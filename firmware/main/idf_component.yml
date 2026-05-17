@@ -1,0 +1,8 @@
+## IDF component manifest for the clawdmeter main component
+dependencies:
+  lvgl/lvgl:
+    version: ">=9.0.0,<10.0.0"
+    rules:
+      - if: "target in [esp32s3]"
+  espressif/nimble:
+    version: "*"

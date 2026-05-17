@@ -1,7 +1,7 @@
 {
-  "name": "aimetr",
-  "version": "1.0.0",
-  "description": "Multi-provider AI usage monitor with desktop pet",
+  "name": "clawdmeter",
+  "version": "2.0.0",
+  "description": "Clawdmeter — multi-provider AI usage monitor for ESP32 AMOLED device + desktop companion",
   "main": "main.js",
   "scripts": {
     "start": "electron .",

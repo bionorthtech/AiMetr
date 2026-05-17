@@ -5,3 +5,21 @@ out/
 *.log
 npm-debug.log*
 electron-builder-debug.log
+
+# ESP-IDF build artefacts
+firmware/build/
+firmware/sdkconfig
+firmware/managed_components/
+firmware/.idf_cmake_build_failed
+*.bin
+*.elf
+*.map
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+daemon/.env
+
+# User config
+*.clawdmeter.json

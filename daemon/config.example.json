@@ -1,0 +1,24 @@
+{
+  "claude": {
+    "enabled": true,
+    "api_key": ""
+  },
+  "openai": {
+    "enabled": true,
+    "api_key": "sk-..."
+  },
+  "deepseek": {
+    "enabled": true,
+    "api_key": "..."
+  },
+  "ollama": {
+    "enabled": true,
+    "base_url": "http://localhost:11434"
+  },
+  "lmstudio": {
+    "enabled": true,
+    "base_url": "http://localhost:1234"
+  },
+  "poll_interval": 60,
+  "task_interval": 10
+}

@@ -1,0 +1,20 @@
+idf_component_register(
+    SRCS
+        "main.cpp"
+        "display.cpp"
+        "ble_receiver.cpp"
+        "ui/ui_main.cpp"
+        "ui/ui_overview.cpp"
+        "ui/ui_provider.cpp"
+        "ui/ui_tasks.cpp"
+        "mascots/mascots.cpp"
+    INCLUDE_DIRS
+        "."
+    REQUIRES
+        nvs_flash
+        bt
+        driver
+        esp_timer
+        lvgl
+        cJSON
+)
