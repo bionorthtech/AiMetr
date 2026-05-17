@@ -23,3 +23,6 @@ daemon/.env
 
 # User config
 *.clawdmeter.json
+
+# Claude Code agent worktrees
+.claude/
