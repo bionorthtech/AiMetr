@@ -1,0 +1,85 @@
+/* Pet overlay window — fully transparent background */
+html, body {
+  margin: 0; padding: 0;
+  width: 160px; height: 200px;
+  background: transparent !important;
+  overflow: hidden;
+  user-select: none;
+}
+
+#pet-root {
+  width: 160px;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 8px;
+  position: relative;
+}
+
+/* ── Canvas (pixel art mascot) ────────────────────────────────── */
+#pet-canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  cursor: grab;
+  display: block;
+  /* canvas size set in JS */
+}
+#pet-canvas:active { cursor: grabbing; }
+
+/* ── Speech bubble ────────────────────────────────────────────── */
+#speech-bubble {
+  position: absolute;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 15, 26, 0.92);
+  color: #e2e8f0;
+  border: 1px solid rgba(124, 58, 237, 0.5);
+  border-radius: 10px;
+  padding: 5px 10px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 10;
+}
+#speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px 5px 0;
+  border-style: solid;
+  border-color: rgba(15,15,26,0.92) transparent transparent;
+}
+#speech-bubble.show { opacity: 1; }
+
+/* ── Provider name label (small) ───────────────────────────────── */
+#provider-label {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 9px;
+  color: rgba(148,163,184,0.7);
+  margin-top: 2px;
+  pointer-events: none;
+}
+
+/* ── Usage mini-bar ────────────────────────────────────────────── */
+#mini-bar-wrap {
+  width: 64px;
+  height: 4px;
+  background: rgba(42,42,74,0.8);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+#mini-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease, background 0.3s;
+  background: #22c55e;
+}

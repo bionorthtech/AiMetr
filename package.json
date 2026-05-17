@@ -1,0 +1,33 @@
+{
+  "name": "aimetr",
+  "version": "1.0.0",
+  "description": "Multi-provider AI usage monitor with desktop pet",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "NODE_ENV=development electron .",
+    "build": "electron-builder"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "com.aimetr.app",
+    "productName": "AIMetr",
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  }
+}

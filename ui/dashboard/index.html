@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'">
+  <title>AIMetr</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div id="app">
+    <!-- macOS titlebar drag region injected via JS if darwin -->
+    <div id="titlebar" hidden></div>
+
+    <!-- Sidebar: provider icons -->
+    <aside id="sidebar">
+      <button class="sidebar-btn active" data-tab="all"      title="All Providers">🌐<span class="dot"></span></button>
+      <button class="sidebar-btn"        data-tab="claude"   title="Claude">🐱<span class="dot"></span></button>
+      <button class="sidebar-btn"        data-tab="openai"   title="OpenAI / Codex">🧠<span class="dot"></span></button>
+      <button class="sidebar-btn"        data-tab="deepseek" title="DeepSeek">🐟<span class="dot"></span></button>
+      <button class="sidebar-btn"        data-tab="ollama"   title="Ollama">🦙<span class="dot"></span></button>
+      <button class="sidebar-btn"        data-tab="lmstudio" title="LM Studio">🤖<span class="dot"></span></button>
+      <div style="flex:1"></div>
+      <button class="sidebar-btn" id="settings-btn" title="Settings">⚙️</button>
+    </aside>
+
+    <!-- Main content -->
+    <div id="main">
+      <div id="tab-bar">
+        <button class="tab-btn active" data-tab="all">All</button>
+        <button class="tab-btn" data-tab="claude">Claude</button>
+        <button class="tab-btn" data-tab="openai">OpenAI</button>
+        <button class="tab-btn" data-tab="deepseek">DeepSeek</button>
+        <button class="tab-btn" data-tab="ollama">Ollama</button>
+        <button class="tab-btn" data-tab="lmstudio">LM Studio</button>
+      </div>
+      <div id="content">
+        <div class="empty-state"><div class="icon">⏳</div>Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings overlay -->
+  <div id="settings-overlay" hidden>
+    <div class="settings-panel" id="settings-panel-content">
+      <!-- populated by settings.js -->
+    </div>
+  </div>
+
+  <!-- Chart.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+
+  <!-- Mascot renderer -->
+  <script src="../pet/mascots.js"></script>
+
+  <!-- Tab modules -->
+  <script src="tabs/provider-tab.js"></script>
+  <script src="tabs/all-tab.js"></script>
+
+  <!-- Settings -->
+  <script src="../settings/settings.js"></script>
+
+  <!-- Dashboard controller (last) -->
+  <script src="dashboard.js"></script>
+</body>
+</html>
