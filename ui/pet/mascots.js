@@ -602,21 +602,70 @@ const COLS = 8;
 const ROWS = 10;
 
 // ── Renderer ────────────────────────────────────────────────────────────────
+// For 'clawd', SEEKER_SPRITE, and CODEX_SPRITE we use 20×20 real sprite data
+// loaded from clawd_sprites.js / sprite_data.js (included before this script).
+// All other mascots use the 8×10 procedural pixel art below.
+
+function _drawSprite20(ctx, spriteData, state, frameIdx, scale) {
+  const frames = spriteData.frames[state] || spriteData.frames.idle;
+  const frame  = frames[frameIdx % frames.length];
+  const pal    = spriteData.palette;
+  const W = 20, H = 20;
+  ctx.clearRect(0, 0, W * scale, H * scale);
+  for (let r = 0; r < H; r++) {
+    for (let c = 0; c < W; c++) {
+      const color = pal[frame[r * W + c]];
+      if (!color || color === 'transparent') continue;
+      ctx.fillStyle = color;
+      ctx.fillRect(c * scale, r * scale, scale, scale);
+    }
+  }
+}
+
+function _drawClawdReal(ctx, state, frameIdx, scale) {
+  // Use real claudepix data if available (clawd_sprites.js loaded)
+  if (typeof CLAWD_SPRITES === 'undefined') return false;
+  const stateKey = (state === 'offline') ? 'idle' : state;
+  const anim = CLAWD_SPRITES[stateKey] || CLAWD_SPRITES.idle;
+  const frames = anim.frames;
+  const frame  = frames[frameIdx % frames.length];
+  const pal    = anim.palette;
+  const W = 20, H = 20;
+  ctx.clearRect(0, 0, W * scale, H * scale);
+  for (let r = 0; r < H; r++) {
+    for (let c = 0; c < W; c++) {
+      const color = pal[frame[r * W + c]];
+      if (!color || color === 'transparent') continue;
+      // Dim when offline
+      ctx.globalAlpha = (state === 'offline') ? 0.3 : 1.0;
+      ctx.fillStyle = color;
+      ctx.fillRect(c * scale, r * scale, scale, scale);
+    }
+  }
+  ctx.globalAlpha = 1.0;
+  return true;
+}
 
 function drawFrame(ctx, mascotId, state, frameIdx, scale) {
+  // Real sprite mascots
+  if (mascotId === 'clawd' && _drawClawdReal(ctx, state, frameIdx, scale)) return;
+  if (mascotId === 'seeker' && typeof SEEKER_SPRITE !== 'undefined') {
+    _drawSprite20(ctx, SEEKER_SPRITE, state, frameIdx, scale); return;
+  }
+  if (mascotId === 'codex' && typeof CODEX_SPRITE !== 'undefined') {
+    _drawSprite20(ctx, CODEX_SPRITE, state, frameIdx, scale); return;
+  }
+
+  // Fallback: procedural 8×10 pixel art
   const mascot = MASCOTS[mascotId];
   if (!mascot) return;
-
   const frames = mascot.frames[state] || mascot.frames.idle;
   const frame  = frames[frameIdx % frames.length];
   const pal    = mascot.palette;
-
   ctx.clearRect(0, 0, COLS * scale, ROWS * scale);
-
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
-      const idx   = row * COLS + col;
-      const color = pal[frame[idx]] || null;
+      const color = pal[frame[row * COLS + col]] || null;
       if (!color || color === 'transparent') continue;
       ctx.fillStyle = color;
       ctx.fillRect(col * scale, row * scale, scale, scale);
