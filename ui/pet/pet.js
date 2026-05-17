@@ -33,13 +33,18 @@ const SPEECH_MESSAGES = {
 };
 
 // ── Canvas setup ─────────────────────────────────────────────────────────────
-const { COLS, ROWS, SCALE, drawFrame, FRAME_RATES } = window.Mascots;
+const M = window.Mascots;
+const PET_COLS  = M.COLS;
+const PET_ROWS  = M.ROWS;
+const PET_SCALE = M.SCALE;
+const PET_DRAW  = M.drawFrame;
+const PET_RATES = M.FRAME_RATES;
 
 const canvas = document.getElementById('pet-canvas');
 const ctx    = canvas.getContext('2d');
 
-const W = COLS * SCALE;
-const H = ROWS * SCALE;
+const W = PET_COLS * PET_SCALE;
+const H = PET_ROWS * PET_SCALE;
 canvas.width  = W;
 canvas.height = H;
 canvas.style.width  = W + 'px';
@@ -52,12 +57,12 @@ function startAnimation(state) {
   animTimer = setInterval(() => {
     currentFrame++;
     render();
-  }, FRAME_RATES[state] || 600);
+  }, PET_RATES[state] || 600);
   render();
 }
 
 function render() {
-  drawFrame(ctx, currentMascot, currentState, currentFrame, SCALE);
+  PET_DRAW(ctx, currentMascot, currentState, currentFrame, PET_SCALE);
 }
 
 // ── State transition ──────────────────────────────────────────────────────────

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'">
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
   <title>AIMetr</title>
   <link rel="stylesheet" href="dashboard.css">
 </head>
@@ -47,8 +47,8 @@
     </div>
   </div>
 
-  <!-- Chart.js from CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <!-- Chart.js (bundled locally) -->
+  <script src="vendor/chart.umd.js"></script>
 
   <!-- Mascot renderer -->
   <script src="../pet/mascots.js"></script>

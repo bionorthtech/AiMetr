@@ -19,7 +19,7 @@ function renderAllTab(usageState, tasks, histories) {
   });
 
   const cards = providers.map(id =>
-    window.ProviderTab.renderProviderCard(id, usageState[id], { compact: true })
+    window.ProviderTab.renderProviderCard(id, usageState[id], { compact: true, showMascot: false })
   ).join('');
 
   // All-mascots row
@@ -28,9 +28,10 @@ function renderAllTab(usageState, tasks, histories) {
     const st = window.ProviderTab.getMascotState(usageState[id]);
     return `
     <div style="text-align:center">
-      <canvas class="tab-mascot-canvas" data-provider="${id}" data-state="${st}"
+      <canvas class="tab-mascot-canvas mascot-large" data-provider="${id}" data-state="${st}"
         style="image-rendering:pixelated;display:block;margin:0 auto"></canvas>
-      <div style="font-size:9px;color:var(--text-dim);margin-top:2px">${m?.icon} ${m?.name?.split(' ')[0]}</div>
+      <div style="font-size:11px;color:var(--text);margin-top:6px;font-weight:600">${m?.icon} ${m?.name?.split(' ')[0]}</div>
+      <div style="font-size:9px;color:var(--text-dim);margin-top:2px">${st}</div>
     </div>`;
   }).join('');
 

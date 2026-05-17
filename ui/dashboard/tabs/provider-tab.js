@@ -31,10 +31,16 @@ function startTabMascot(providerId, canvasEl, mascotState) {
   const meta = PROVIDER_META[providerId];
   if (!meta || !canvasEl) return;
 
+  // Tab mascots: keep internal resolution at SCALE, but display larger via CSS
+  // (image-rendering: pixelated preserves crisp pixels when upscaled)
+  const cssScale =
+    canvasEl.classList.contains('mascot-large') ? 2.0 :
+    canvasEl.classList.contains('mascot-small') ? 0.9 :
+    1.5;
   canvasEl.width  = COLS * SCALE;
   canvasEl.height = ROWS * SCALE;
-  canvasEl.style.width  = (COLS * SCALE) + 'px';
-  canvasEl.style.height = (ROWS * SCALE) + 'px';
+  canvasEl.style.width  = Math.round(COLS * SCALE * cssScale) + 'px';
+  canvasEl.style.height = Math.round(ROWS * SCALE * cssScale) + 'px';
 
   const ctx = canvasEl.getContext('2d');
   let frame = 0;
@@ -83,7 +89,7 @@ function barClass(pct) {
   return 'green';
 }
 
-function renderProviderCard(providerId, state, { compact = false } = {}) {
+function renderProviderCard(providerId, state, { compact = false, showMascot = true } = {}) {
   const meta = PROVIDER_META[providerId];
   if (!meta) return '';
 
@@ -98,10 +104,11 @@ function renderProviderCard(providerId, state, { compact = false } = {}) {
 
   return `
   <div class="provider-card" style="border-left: 3px solid ${meta.color}">
+    ${showMascot ? `
     <div class="card-mascot">
-      <canvas class="tab-mascot-canvas" data-provider="${providerId}" data-state="${mascotSt}"
+      <canvas class="tab-mascot-canvas mascot-small" data-provider="${providerId}" data-state="${mascotSt}"
         style="image-rendering:pixelated"></canvas>
-    </div>
+    </div>` : ''}
 
     <div class="card-header">
       <div class="card-title">
@@ -186,7 +193,7 @@ function renderProviderTab(providerId, state, tasks, history) {
     <!-- Header row with mascot -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--gap)">
       <div style="display:flex;align-items:center;gap:12px">
-        <canvas class="tab-mascot-canvas"
+        <canvas class="tab-mascot-canvas mascot-large"
           data-provider="${providerId}"
           data-state="${getMascotState(state)}"
           style="image-rendering:pixelated"></canvas>
@@ -202,7 +209,7 @@ function renderProviderTab(providerId, state, tasks, history) {
       <button class="refresh-btn" data-refresh="${providerId}" style="padding:6px 14px">↻ Refresh</button>
     </div>
 
-    ${renderProviderCard(providerId, state)}
+    ${renderProviderCard(providerId, state, { showMascot: false })}
 
     <!-- Historical chart -->
     ${connected ? `

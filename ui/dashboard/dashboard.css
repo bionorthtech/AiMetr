@@ -277,6 +277,9 @@ body.darwin #titlebar { grid-column: 1 / -1; -webkit-app-region: drag; height: 2
   padding: 14px;
   margin-top: var(--gap);
 }
+.chart-container canvas {
+  max-height: 220px;
+}
 .chart-title {
   font-size: 12px;
   font-weight: 600;

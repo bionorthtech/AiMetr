@@ -9,6 +9,7 @@
     "build": "electron-builder"
   },
   "dependencies": {
+    "chart.js": "^4.5.1",
     "electron-store": "^8.1.0",
     "node-fetch": "^2.7.0"
   },
