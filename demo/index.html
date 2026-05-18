@@ -3,153 +3,119 @@
 <head>
 <meta charset="UTF-8">
 <title>Clawdmeter — Device Sandbox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:      #000000;
+  --panel:   #1f1f1e;
+  --text:    #faf9f5;
+  --dim:     #b0aea5;
+  --accent:  #d97757;
+  --green:   #788c5d;
+  --amber:   #d97757;
+  --red:     #c0392b;
+  --bar-bg:  #2a2a28;
+}
 body {
-  background: #080810;
+  background: #0a0a0c;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  padding: 24px;
-  gap: 24px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  padding: 24px; gap: 20px;
+  color: var(--text);
 }
 .page-title {
-  color: #94a3b8;
-  font-size: 13px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  font-weight: 600;
+  color: var(--dim); font-size: 12px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  font-weight: 500;
 }
-.device-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
+.device-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
 .device {
-  background: linear-gradient(160deg, #2a2a3a 0%, #181820 60%, #111118 100%);
-  border-radius: 36px;
-  padding: 18px;
+  background: linear-gradient(160deg, #f4f1ec 0%, #d8d2c5 60%, #b8b2a5 100%);
+  border-radius: 32px;
+  padding: 16px;
   box-shadow:
-    0 0 0 1px #3a3a5a,
-    0 0 60px rgba(124,58,237,0.18),
-    0 40px 80px rgba(0,0,0,0.8),
-    inset 0 1px 0 rgba(255,255,255,0.06);
+    0 0 0 1px rgba(0,0,0,0.1),
+    0 30px 60px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.5);
   position: relative;
 }
-.device::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: -6px;
-  transform: translateY(-50%);
-  width: 4px;
-  height: 48px;
-  background: #2a2a3a;
-  border-radius: 2px 4px 4px 2px;
-  box-shadow: inset -1px 0 0 rgba(0,0,0,0.5);
+.device::after {
+  content: ''; position: absolute; top: 50%; right: -4px;
+  transform: translateY(-50%); width: 3px; height: 60px;
+  background: #b8b2a5; border-radius: 2px 4px 4px 2px;
 }
+.device.dark {
+  background: linear-gradient(160deg, #2a2a2a 0%, #181818 60%, #0a0a0a 100%);
+}
+.device.dark::after { background: #1a1a1a; }
 .screen-frame {
-  background: #000;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
-  cursor: pointer;
-  user-select: none;
-  position: relative;
+  background: #000; border-radius: 18px; overflow: hidden;
+  cursor: pointer; user-select: none; position: relative;
 }
-.screen-frame canvas {
-  display: block;
-}
+.screen-frame canvas { display: block; }
 .device-brand {
-  text-align: center;
-  color: #3a3a5a;
-  font-size: 10px;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  margin-top: 12px;
+  text-align: center; color: rgba(0,0,0,0.4); font-size: 9px;
+  letter-spacing: 0.3em; text-transform: uppercase;
+  margin-top: 8px; font-weight: 600;
 }
-.controls {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: center;
-}
+.controls { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
 .btn {
-  background: #1a1a2e;
-  border: 1px solid #2a2a4a;
-  color: #94a3b8;
-  padding: 8px 18px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  transition: all 0.15s;
+  background: #1a1a1a; border: 1px solid #2a2a2a; color: #b0aea5;
+  padding: 8px 16px; border-radius: 6px; cursor: pointer;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  font-family: 'Inter', sans-serif; transition: all 0.15s;
 }
-.btn:hover { background: #2a2a4a; color: #e2e8f0; border-color: #7c3aed; }
-.btn.active { background: #7c3aed; border-color: #7c3aed; color: #fff; }
-.hint {
-  color: #2a2a4a;
-  font-size: 11px;
-  letter-spacing: 0.05em;
-}
-.screen-tabs {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  justify-content: center;
-  max-width: 560px;
-}
+.btn:hover { background: #2a2a2a; color: #faf9f5; border-color: #d97757; }
+.btn.on { background: #d97757; border-color: #d97757; color: #faf9f5; }
+.screen-tabs { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 560px; }
 .tab {
-  background: #1a1a2e;
-  border: 1px solid #2a2a4a;
-  color: #94a3b8;
-  padding: 5px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 11px;
-  transition: all 0.1s;
+  background: #141414; border: 1px solid #2a2a2a; color: #b0aea5;
+  padding: 5px 11px; border-radius: 5px; cursor: pointer; font-size: 10.5px;
+  font-family: 'Inter', sans-serif; font-weight: 500; letter-spacing: 0.03em;
 }
-.tab:hover, .tab.on { background: #2a2a4a; color: #e2e8f0; }
-.tab.on { border-color: #7c3aed; }
+.tab:hover, .tab.on { background: #2a2a2a; color: #faf9f5; }
+.tab.on { border-color: #d97757; }
+.credit { color: #444; font-size: 10px; text-align: center; }
+.credit a { color: #d97757; text-decoration: none; }
 </style>
 </head>
 <body>
 
-<div class="page-title">Clawdmeter · Device Sandbox</div>
+<div class="page-title">Clawdmeter v2 · Multi-Provider Device Sandbox</div>
 
 <div class="device-wrap">
-  <div class="device">
+  <div class="device dark">
     <div class="screen-frame" id="screen-frame">
       <canvas id="screen" width="480" height="480"></canvas>
     </div>
-    <div class="device-brand">CLAWDMETER v2</div>
+    <div class="device-brand">CLAWDMETER</div>
   </div>
 
   <div class="screen-tabs" id="screen-tabs">
-    <button class="tab on"  onclick="goScreen(0)">Overview</button>
-    <button class="tab" onclick="goScreen(1)">Claude</button>
-    <button class="tab" onclick="goScreen(2)">OpenAI</button>
-    <button class="tab" onclick="goScreen(3)">DeepSeek</button>
-    <button class="tab" onclick="goScreen(4)">Ollama</button>
-    <button class="tab" onclick="goScreen(5)">LM Studio</button>
-    <button class="tab" onclick="goScreen(6)">Tasks</button>
+    <button class="tab on"  data-s="0" onclick="goScreen(0)">Splash</button>
+    <button class="tab" data-s="1" onclick="goScreen(1)">Claude</button>
+    <button class="tab" data-s="2" onclick="goScreen(2)">OpenAI</button>
+    <button class="tab" data-s="3" onclick="goScreen(3)">DeepSeek</button>
+    <button class="tab" data-s="4" onclick="goScreen(4)">Ollama</button>
+    <button class="tab" data-s="5" onclick="goScreen(5)">LM Studio</button>
+    <button class="tab" data-s="6" onclick="goScreen(6)">Tasks</button>
+    <button class="tab" data-s="7" onclick="goScreen(7)">Bluetooth</button>
   </div>
 
   <div class="controls">
-    <button class="btn" onclick="cycleNext()">▶ Next Screen</button>
-    <button class="btn" id="auto-btn" onclick="toggleAuto()">⏸ Pause Auto</button>
-    <button class="btn" id="ble-btn" onclick="toggleBLE()">BLE: Connected</button>
+    <button class="btn" onclick="cycleNext()">Next ›</button>
+    <button class="btn" id="auto-btn" onclick="toggleAuto()">⏸ Pause</button>
+    <button class="btn" id="ble-btn" onclick="toggleBLE()">BLE: On</button>
   </div>
-  <div class="hint">Click the screen or use buttons to navigate</div>
 </div>
 
-<!-- Inlined sprite data -->
+<div class="credit">Built on the original by <a href="https://github.com/HermannBjorgvin/Clawdmeter">@hermannbjorgvin</a> · Clawd animations by <a href="https://x.com/amaanbuilds">@amaanbuilds</a></div>
+
 <script>
 // Clawd sprite data from claudepix.vercel.app — DO NOT EDIT
 const CLAWD_SPRITES = {
@@ -268,73 +234,104 @@ const CODEX_SPRITE  = {"palette":["transparent","#4A6EB5","#0a0a1a"],"cols":20,"
 
 <script>
 'use strict';
-// ═══════════════════════════════════════════════════════════════════════════
-// CLAWDMETER DEVICE SIMULATOR
-// ═══════════════════════════════════════════════════════════════════════════
 
-const CANVAS  = document.getElementById('screen');
-const CTX     = CANVAS.getContext('2d');
+// ════════════════════════════════════════════════════════════════════════════
+// CLAWDMETER v2 — Multi-provider, matching original UI design exactly
+// ════════════════════════════════════════════════════════════════════════════
+
+const CANVAS = document.getElementById('screen');
+const CTX = CANVAS.getContext('2d');
 const W = 480, H = 480;
 
-// ── Colour palette (AMOLED dark) ────────────────────────────────────────────
-const C = {
-  bg:       '#0f0f1a',
-  surface:  '#1a1a2e',
-  surface2: '#16213e',
-  border:   '#2a2a4a',
-  text:     '#e2e8f0',
-  dim:      '#94a3b8',
-  accent:   '#7c3aed',
-  green:    '#4ade80',
-  red:      '#f87171',
-  orange:   '#f97316',
-  yellow:   '#eab308',
-  green2:   '#22c55e',
+// ── Theme tokens (from original firmware/src/theme.h) ──────────────────────
+const T = {
+  bg:      '#000000',
+  panel:   '#1f1f1e',
+  text:    '#faf9f5',
+  dim:     '#b0aea5',
+  accent:  '#d97757',
+  green:   '#788c5d',
+  amber:   '#d97757',
+  red:     '#c0392b',
+  bar_bg:  '#2a2a28',
 };
 
+// ── Layout (from original ui.cpp) ─────────────────────────────────────────
+const L = {
+  margin:      20,           // screen margin for round corners
+  content_w:   440,
+  title_y:     30,
+  panel_y:     100,
+  panel_h:     150,
+  panel_gap:   16,
+  panel_pad_x: 16,
+  panel_pad_y: 12,
+  panel_r:     8,
+  bar_h:       24,
+  bar_r:       6,
+  pill_pad_x:  18,
+  pill_pad_y:  6,
+};
+
+// ── Provider metadata ────────────────────────────────────────────────────────
 const PROVIDERS = [
-  { id:'claude',   name:'Claude',    short:'CLAUD', color:'#CC785C', mascot:'clawd'   },
-  { id:'openai',   name:'OpenAI',    short:'OAI',   color:'#10A37F', mascot:'codex'   },
-  { id:'deepseek', name:'DeepSeek',  short:'DEEP',  color:'#536AE6', mascot:'seeker'  },
-  { id:'ollama',   name:'Ollama',    short:'OLAMA', color:'#F9A825', mascot:'llami'   },
-  { id:'lmstudio', name:'LM Studio', short:'LMS',   color:'#9C27B0', mascot:'studio'  },
+  { id:'claude',   name:'Claude',    color:'#d97757', mascot:'clawd'  },
+  { id:'openai',   name:'OpenAI',    color:'#10A37F', mascot:'codex'  },
+  { id:'deepseek', name:'DeepSeek',  color:'#536AE6', mascot:'seeker' },
+  { id:'ollama',   name:'Ollama',    color:'#F9A825', mascot:'llami'  },
+  { id:'lmstudio', name:'LM Studio', color:'#9C27B0', mascot:'studio' },
 ];
 
-// ── Mock state ───────────────────────────────────────────────────────────────
+// ── Mock state ────────────────────────────────────────────────────────────
 let bleConnected = true;
 const STATE = {
-  claude:   { connected:true,  pct:67, pct2:34, tokens:67000, limit:100000, cost:0.84, reset:22, model:'claude-sonnet-4-6' },
-  openai:   { connected:true,  pct:23, pct2:11, tokens:23000, limit:100000, cost:0.31, reset:-1, model:'gpt-4o' },
+  claude:   { connected:true,  pct:29, pct2:4,  reset_h:2, reset_m:22, week_d:6, week_h:19, model:'claude-sonnet-4-6' },
+  openai:   { connected:true,  pct:23, pct2:11, reset_h:0, reset_m:0,  week_d:0, week_h:0,  model:'gpt-4o' },
   deepseek: { connected:false, pct:0,  pct2:0,  error:'No API key' },
-  ollama:   { connected:true,  pct:45, pct2:0,  tokens:0,     limit:0,     cost:0,    reset:-1, model:'llama3.2' },
+  ollama:   { connected:true,  pct:45, pct2:0,  reset_h:0, reset_m:0,  week_d:0, week_h:0,  model:'llama3.2' },
   lmstudio: { connected:false, pct:0,  pct2:0,  error:'Not running' },
 };
 const TASKS = [
-  { label:'Fix auth bug in dashboard',      model:'claude-sonnet-4-6', ti:45000, to:8000,  limit:100000, prov:0 },
-  { label:'Write unit tests for API',       model:'claude-sonnet-4-6', ti:12000, to:3000,  limit:100000, prov:0 },
-  { label:'Generate product descriptions',  model:'gpt-4o',            ti:8000,  to:5000,  limit:100000, prov:1 },
-  { label:'Summarise PR changes',           model:'claude-haiku-4-5',  ti:3200,  to:1800,  limit:100000, prov:0 },
+  { label:'Fix auth bug in dashboard',     model:'claude-sonnet-4-6', ti:45000, to:8000, limit:100000, prov:0 },
+  { label:'Write unit tests for API',      model:'claude-sonnet-4-6', ti:12000, to:3000, limit:100000, prov:0 },
+  { label:'Generate product descriptions', model:'gpt-4o',            ti:8000,  to:5000, limit:100000, prov:1 },
 ];
 
+// ── Animation messages (from original anim_messages array, sampled) ────────
+const ANIM_MESSAGES = [
+  "Accomplishing","Baking","Booping","Brewing","Calculating","Cerebrating",
+  "Channelling","Churning","Clauding","Cogitating","Computing","Concocting",
+  "Conjuring","Considering","Contemplating","Cooking","Crafting","Creating",
+  "Crunching","Deciphering","Deliberating","Determining","Divining","Doing",
+  "Effecting","Elucidating","Enchanting","Envisioning","Finagling","Forging",
+  "Forming","Frolicking","Generating","Hatching","Honking","Hustling",
+  "Ideating","Imagining","Incubating","Inferring","Jiving","Manifesting",
+  "Marinating","Meandering","Moseying","Mulling","Musing","Noodling",
+  "Percolating","Perusing","Philosophising","Pondering","Processing","Puzzling",
+  "Ruminating","Scheming","Shimmying","Simmering","Spelunking","Spinning",
+  "Stewing","Sussing","Synthesizing","Thinking","Tinkering","Transmuting",
+  "Unfurling","Unravelling","Vibing","Wandering","Whirring","Wibbling",
+  "Wizarding","Working","Wrangling",
+];
+const SPINNER_FRAMES = ['·','✻','✽','✶','✳','✲'];
+let messageIdx = Math.floor(Math.random() * ANIM_MESSAGES.length);
+let messageElapsed = 0;
+
 // ── Screen management ────────────────────────────────────────────────────────
-let curScreen   = 0;
-const NSCREENS  = 7;
+let curScreen = 0;
+const NSCREENS = 8;  // splash + 5 providers + tasks + bluetooth
 let autoAdvance = true;
-let autoTimer   = 0;
-const AUTO_MS   = 4500;
+let autoTimer = 0;
+const AUTO_MS = 5000;
 
-// Transition state
-let transition = { active: false, from: 0, to: 0, t: 0, dur: 280 };
-let offscreen1 = document.createElement('canvas');
-let offscreen2 = document.createElement('canvas');
-offscreen1.width = offscreen2.width = W;
-offscreen1.height = offscreen2.height = H;
+let transition = { active: false, from: 0, to: 0, t: 0, dur: 320 };
+const off1 = document.createElement('canvas'); off1.width=W; off1.height=H;
+const off2 = document.createElement('canvas'); off2.width=W; off2.height=H;
 
-// ── Mascot animation ─────────────────────────────────────────────────────────
+// ── Mascot animation tracking ────────────────────────────────────────────
 const MANIM = {};
-for (const p of PROVIDERS) {
-  MANIM[p.mascot] = { frame: 0, elapsed: 0 };
-}
+PROVIDERS.forEach(p => { MANIM[p.mascot] = { frame: 0, elapsed: 0 }; });
+const SPLASH_ANIM = { frame: 0, elapsed: 0 };
 
 function getMascotState(provId) {
   const s = STATE[provId];
@@ -344,37 +341,34 @@ function getMascotState(provId) {
   return 'idle';
 }
 
-function getMascotFrameCount(mascotId, stateKey) {
+function getFrameData(mascotId, stateKey, frame) {
   const st = (stateKey === 'offline') ? 'idle' : stateKey;
   if (mascotId === 'clawd' && typeof CLAWD_SPRITES !== 'undefined') {
     const a = CLAWD_SPRITES[st] || CLAWD_SPRITES.idle;
-    return a.frames.length;
+    return { frames: a.frames, palette: a.palette, holds: a.holds };
   }
   if (mascotId === 'seeker' && typeof SEEKER_SPRITE !== 'undefined') {
     const f = SEEKER_SPRITE.frames[st] || SEEKER_SPRITE.frames.idle;
-    return f.length;
+    return { frames: f, palette: SEEKER_SPRITE.palette, holds: null };
   }
   if (mascotId === 'codex' && typeof CODEX_SPRITE !== 'undefined') {
     const f = CODEX_SPRITE.frames[st] || CODEX_SPRITE.frames.idle;
-    return f.length;
+    return { frames: f, palette: CODEX_SPRITE.palette, holds: null };
   }
-  return 4; // procedural: 4 frames
+  return null;
 }
 
-function getMascotHold(mascotId, stateKey, frame) {
-  const st = (stateKey === 'offline') ? 'idle' : stateKey;
-  if (mascotId === 'clawd' && typeof CLAWD_SPRITES !== 'undefined') {
-    const a = CLAWD_SPRITES[st] || CLAWD_SPRITES.idle;
-    return a.holds[frame % a.holds.length] || 400;
-  }
+function getHold(mascotId, stateKey, frame) {
+  const d = getFrameData(mascotId, stateKey, frame);
+  if (d && d.holds) return d.holds[frame % d.holds.length] || 400;
   if (stateKey === 'excited') return 150;
   if (stateKey === 'thinking') return 250;
   if (stateKey === 'sleeping') return 900;
   return 500;
 }
 
-// ── Sprite renderer ──────────────────────────────────────────────────────────
-function drawSprite(ctx, x, y, flatGrid, palette, scale, alpha) {
+// ── Sprite renderer ──────────────────────────────────────────────────────
+function drawSpriteGrid(ctx, x, y, flatGrid, palette, scale, alpha) {
   ctx.save();
   if (alpha !== undefined) ctx.globalAlpha = alpha;
   for (let i = 0; i < flatGrid.length; i++) {
@@ -388,564 +382,456 @@ function drawSprite(ctx, x, y, flatGrid, palette, scale, alpha) {
   ctx.restore();
 }
 
-function drawMascot(ctx, mascotId, provId, cx, cy, size) {
+function drawMascot(ctx, mascotId, provId, cx, cy, size, animOverride) {
   const scale = Math.round(size / 20);
   const ox = cx - size/2, oy = cy - size/2;
   const mSt = getMascotState(provId);
-  const st  = (mSt === 'offline') ? 'idle' : mSt;
-  const alpha = (mSt === 'offline') ? 0.25 : 1.0;
-  const anim = MANIM[mascotId];
+  const st = (mSt === 'offline') ? 'idle' : mSt;
+  const alpha = (mSt === 'offline') ? 0.3 : 1.0;
+  const anim = animOverride || MANIM[mascotId];
 
-  if (mascotId === 'clawd' && typeof CLAWD_SPRITES !== 'undefined') {
-    const a = CLAWD_SPRITES[st] || CLAWD_SPRITES.idle;
-    const frame = a.frames[anim.frame % a.frames.length];
-    drawSprite(ctx, ox, oy, frame, a.palette, scale, alpha);
+  const data = getFrameData(mascotId, st, anim.frame);
+  if (data) {
+    const frame = data.frames[anim.frame % data.frames.length];
+    drawSpriteGrid(ctx, ox, oy, frame, data.palette, scale, alpha);
     return;
   }
-  if (mascotId === 'seeker' && typeof SEEKER_SPRITE !== 'undefined') {
-    const frames = SEEKER_SPRITE.frames[st] || SEEKER_SPRITE.frames.idle;
-    const frame = frames[anim.frame % frames.length];
-    drawSprite(ctx, ox, oy, frame, SEEKER_SPRITE.palette, scale, alpha);
-    return;
-  }
-  if (mascotId === 'codex' && typeof CODEX_SPRITE !== 'undefined') {
-    const frames = CODEX_SPRITE.frames[st] || CODEX_SPRITE.frames.idle;
-    const frame = frames[anim.frame % frames.length];
-    drawSprite(ctx, ox, oy, frame, CODEX_SPRITE.palette, scale, alpha);
-    return;
-  }
-  // Procedural fallback for llami + studio
-  if (mascotId === 'llami') drawLlamiProc(ctx, cx, cy, size, mSt, anim.frame);
-  else if (mascotId === 'studio') drawStudioProc(ctx, cx, cy, size, mSt, anim.frame);
+  if (mascotId === 'llami') drawLlamaProc(ctx, cx, cy, size, mSt, anim.frame, alpha);
+  else if (mascotId === 'studio') drawRobotProc(ctx, cx, cy, size, mSt, anim.frame, alpha);
 }
 
-// ── Procedural: Ollama llama ─────────────────────────────────────────────────
-function drawLlamiProc(ctx, cx, cy, size, state, frame) {
-  const s  = size / 120;
-  const b  = (state==='excited') ? (frame%2?-3:3)*s : (state==='idle') ? (frame%2?0:2)*s : 0;
-  ctx.save();
-  ctx.translate(cx, cy + b);
+// ── Procedural llama (Ollama) ──────────────────────────────────────────
+function drawLlamaProc(ctx, cx, cy, size, state, frame, alpha) {
+  const s = size / 20;
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.translate(cx, cy);
+  const bob = (state==='excited')?(frame%2?-1:1)*s:(state==='idle')?(frame%2?0:0.5)*s:0;
+  ctx.translate(0, bob);
+  // Body (using 20x20 grid)
   const gold='#F9A825', cream='#FFE6B4', brn='#784A14';
-  // Neck
-  fillR(ctx,-14*s,8*s,28*s,28*s,4*s,gold);
-  // Head
-  fillR(ctx,-30*s,-30*s,60*s,52*s,16*s,gold);
-  // Snout
-  fillR(ctx,-18*s,4*s,36*s,20*s,8*s,cream);
+  const drawCell = (c, r, col) => {
+    ctx.fillStyle = col;
+    ctx.fillRect((c-10)*s, (r-10)*s, s, s);
+  };
+  // Head body
+  for(let r=5;r<15;r++) for(let c=5;c<15;c++) drawCell(c,r,gold);
   // Ears
-  fillR(ctx,-30*s,-44*s,14*s,22*s,4*s,gold);
-  fillR(ctx,16*s,-44*s,14*s,22*s,4*s,gold);
-  fillR(ctx,-27*s,-41*s,8*s,14*s,2*s,cream);
-  fillR(ctx,19*s,-41*s,8*s,14*s,2*s,cream);
+  for(let r=2;r<6;r++) { drawCell(5,r,gold); drawCell(6,r,gold); drawCell(13,r,gold); drawCell(14,r,gold); }
   // Tuft
-  fillCirc(ctx,-8*s,-28*s,8*s,cream);
-  fillCirc(ctx,0,-32*s,9*s,cream);
-  fillCirc(ctx,8*s,-28*s,8*s,cream);
+  for(let r=1;r<5;r++) for(let c=7;c<13;c++) drawCell(c,r,cream);
+  // Snout
+  for(let r=11;r<14;r++) for(let c=7;c<13;c++) drawCell(c,r,cream);
   // Eyes
-  if(state==='sleeping'){
-    ctx.strokeStyle=brn; ctx.lineWidth=3*s;
-    ctx.beginPath(); ctx.moveTo(-18*s,-10*s); ctx.lineTo(-8*s,-10*s); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(8*s,-10*s);   ctx.lineTo(18*s,-10*s); ctx.stroke();
+  if(state==='sleeping') {
+    drawCell(7,9,brn); drawCell(8,9,brn);
+    drawCell(11,9,brn); drawCell(12,9,brn);
   } else {
-    fillCirc(ctx,-14*s,-10*s,7*s,brn);
-    fillCirc(ctx,14*s,-10*s,7*s,brn);
-    fillCirc(ctx,-12*s,-12*s,2.5*s,'#fff');
-    fillCirc(ctx,16*s,-12*s,2.5*s,'#fff');
+    drawCell(7,9,brn); drawCell(12,9,brn);
   }
   // Nostrils
-  fillCirc(ctx,-6*s,14*s,3*s,brn);
-  fillCirc(ctx,6*s,14*s,3*s,brn);
-  // Thinking dots
-  if(state==='thinking') {
-    for(let i=0;i<3;i++){
-      const a=(frame*90+i*120)*Math.PI/180;
-      fillCirc(ctx,Math.cos(a)*22*s,-42*s+Math.sin(a)*8*s,4*s,gold);
-    }
-  }
+  drawCell(8,13,brn); drawCell(11,13,brn);
+  // Neck
+  for(let r=15;r<19;r++) for(let c=8;c<12;c++) drawCell(c,r,gold);
   ctx.restore();
 }
 
-// ── Procedural: LM Studio robot ──────────────────────────────────────────────
-function drawStudioProc(ctx, cx, cy, size, state, frame) {
-  const s=size/120;
-  const b=(state==='excited')?(frame%2?-3:3)*s:(state==='idle')?(frame%2?0:2)*s:0;
-  const led=(state==='excited')?'#FF50FF':'#C864FF';
-  ctx.save();
-  ctx.translate(cx, cy + b);
+// ── Procedural robot (LM Studio) ───────────────────────────────────────
+function drawRobotProc(ctx, cx, cy, size, state, frame, alpha) {
+  const s = size / 20;
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.translate(cx, cy);
+  const bob = (state==='excited')?(frame%2?-1:1)*s:(state==='idle')?(frame%2?0:0.5)*s:0;
+  ctx.translate(0, bob);
+  const pur='#9C27B0', lav='#C88ADC', led=(state==='excited'?'#FF50FF':'#C864FF'), drk='#3C0A50';
+  const drawCell = (c, r, col) => {
+    ctx.fillStyle = col;
+    ctx.fillRect((c-10)*s, (r-10)*s, s, s);
+  };
   // Antenna
-  fillR(ctx,-2*s,-56*s,4*s,20*s,2*s,'#C88ADC');
-  fillCirc(ctx,0,-58*s,6*s,frame%2===0?led:'#7c3aed');
-  // Head
-  fillR(ctx,-34*s,-36*s,68*s,62*s,10*s,'#9C27B0');
+  for(let r=1;r<4;r++) drawCell(10,r,lav);
+  drawCell(10,0,frame%2===0?led:pur);
+  // Head box
+  for(let r=4;r<14;r++) for(let c=4;c<16;c++) drawCell(c,r,pur);
   // Visor
-  fillR(ctx,-28*s,-28*s,56*s,38*s,6*s,'#3C0A50');
+  for(let r=6;r<11;r++) for(let c=5;c<15;c++) drawCell(c,r,drk);
   // LED eyes
-  const er=(state==='thinking')?6+frame%3:8;
-  fillR(ctx,-22*s,-16*s,er*2*s,er*2*s,3*s,led);
-  fillR(ctx,6*s,-16*s,er*2*s,er*2*s,3*s,led);
-  fillCirc(ctx,-18*s,-12*s,2*s,'#fff');
-  fillCirc(ctx,10*s,-12*s,2*s,'#fff');
-  // Mouth segments
-  const segs=(state==='excited')?6:4;
-  for(let i=0;i<segs;i++) {
-    fillR(ctx,(-22+i*9)*s,8*s,6*s,4*s,1,i%2===frame%2?led:'#3C0A50');
+  for(let r=7;r<10;r++) {
+    for(let c=6;c<9;c++) drawCell(c,r,led);
+    for(let c=11;c<14;c++) drawCell(c,r,led);
   }
-  // Bolts
-  [[-34,-10],[-34,10],[34,-10],[34,10]].forEach(([bx,by])=>fillCirc(ctx,bx*s,by*s,4*s,'#C88ADC'));
-  // Neck + shoulders
-  fillR(ctx,-14*s,26*s,28*s,12*s,4*s,'#9C27B0');
-  fillR(ctx,-42*s,32*s,84*s,12*s,6*s,'#C88ADC');
+  // Mouth
+  [6,8,10,12].forEach((c,i) => drawCell(c,11, i%2===frame%2 ? led : drk));
+  // Neck/shoulders
+  for(let c=7;c<13;c++) drawCell(c,14,pur);
+  for(let c=2;c<18;c++) drawCell(c,15,lav);
   ctx.restore();
 }
 
-// ── Canvas helpers ────────────────────────────────────────────────────────────
-function fillR(ctx,x,y,w,h,r,col){
-  ctx.fillStyle=col; ctx.beginPath();
-  ctx.roundRect(x,y,w,h,r); ctx.fill();
-}
-function fillCirc(ctx,x,y,r,col){
-  ctx.fillStyle=col; ctx.beginPath();
-  ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
-}
-function barColor(pct){
-  if(pct>=80) return C.red;
-  if(pct>=60) return C.orange;
-  if(pct>=40) return C.yellow;
-  return C.green2;
-}
-function fmtCost(v){ return v<0.01?'$0.00':'$'+v.toFixed(2); }
-function fmtReset(m){ if(m<=0) return '—'; if(m>=60) return Math.floor(m/60)+'h '+m%60+'m'; return m+'m'; }
-function fmtTok(n){ if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(1)+'k'; return String(n); }
-
-// ── Drawing primitives ────────────────────────────────────────────────────────
-function drawBar(ctx, x, y, w, h, pct, radius=4) {
-  // Track
-  ctx.fillStyle = C.border;
-  ctx.beginPath(); ctx.roundRect(x,y,w,h,radius); ctx.fill();
-  // Fill
-  const fw = Math.max(0, Math.min(w, (w*pct)/100));
-  if(fw > 0) {
-    ctx.fillStyle = barColor(pct);
-    ctx.beginPath(); ctx.roundRect(x,y,fw,h,radius); ctx.fill();
-  }
+// ── Helpers ────────────────────────────────────────────────────────────
+function bar_color(pct) {
+  if (pct >= 80) return T.red;
+  if (pct >= 50) return T.amber;
+  return T.green;
 }
 
-function drawStatBox(ctx, x, y, w, h, label, value) {
-  ctx.fillStyle = C.surface2;
-  ctx.beginPath(); ctx.roundRect(x,y,w,h,8); ctx.fill();
-  ctx.fillStyle = C.dim;
-  ctx.font = '10px -apple-system,sans-serif';
-  ctx.textAlign = 'left';
-  ctx.fillText(label, x+8, y+18);
-  ctx.fillStyle = C.text;
-  ctx.font = 'bold 13px -apple-system,sans-serif';
-  const val = String(value).length > 14 ? String(value).slice(0,13)+'…' : String(value);
-  ctx.fillText(val, x+8, y+h-10);
+function fmt_pct(p) { return p + '%'; }
+function fmt_reset(h, m) {
+  if (h === 0 && m === 0) return 'Resets soon';
+  if (h === 0) return `Resets in ${m}m`;
+  return `Resets in ${h}h ${m}m`;
+}
+function fmt_week(d, h) {
+  if (d === 0 && h === 0) return 'Resets soon';
+  return `Resets in ${d}d ${h}h`;
+}
+function fmt_tok(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(1)+'M';
+  if (n >= 1000) return (n/1000).toFixed(1)+'k';
+  return String(n);
 }
 
-function drawBadge(ctx, x, y, text, ok) {
-  const pad = 8, h = 20;
-  ctx.font = '10px -apple-system,sans-serif';
-  const tw = ctx.measureText(text).width;
-  const bw = tw + pad*2;
-  ctx.fillStyle = ok ? '#14532d' : '#450a0a';
-  ctx.beginPath(); ctx.roundRect(x,y,bw,h,10); ctx.fill();
-  ctx.fillStyle = ok ? C.green : C.red;
-  ctx.textAlign = 'left';
-  ctx.fillText(text, x+pad, y+13);
-  return bw;
-}
-
-function drawNavDots(ctx, current) {
-  const n=NSCREENS, r=4, gap=12;
-  const total = n*(r*2)+(n-1)*gap;
-  let x = (W-total)/2;
-  for(let i=0;i<n;i++) {
-    ctx.beginPath();
-    ctx.arc(x+r, H-14, r, 0, Math.PI*2);
-    ctx.fillStyle = i===current ? C.accent : C.border;
-    ctx.fill();
-    x += r*2+gap;
-  }
-}
-
-function drawStatusBar(ctx) {
-  ctx.fillStyle = C.surface;
-  ctx.fillRect(0,0,W,36);
-  ctx.fillStyle = C.border;
-  ctx.fillRect(0,35,W,1);
-  // Title
-  ctx.fillStyle = C.text;
-  ctx.font = 'bold 15px -apple-system,sans-serif';
-  ctx.textAlign = 'left';
-  ctx.fillText('CLAWDMETER', 14, 23);
-  // BLE dot
-  ctx.beginPath(); ctx.arc(W-14,18,5,0,Math.PI*2);
-  ctx.fillStyle = bleConnected ? C.green : C.red;
-  ctx.fill();
-  // Time mock
-  ctx.fillStyle = C.dim;
-  ctx.font = '11px -apple-system,sans-serif';
-  ctx.textAlign = 'right';
-  const now = new Date();
-  ctx.fillText(now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0'), W-30,23);
-}
-
-// ── Screen 0: Overview ────────────────────────────────────────────────────────
-function renderOverview(ctx) {
-  ctx.fillStyle = C.bg; ctx.fillRect(0,0,W,H);
-  drawStatusBar(ctx);
-
-  const TW=144, TH=158, GAP=8;
-  // Row 1: 3 tiles
-  const row1y = 46, row1xs = [8, 8+TW+GAP, 8+2*(TW+GAP)];
-  // Row 2: 2 tiles centred
-  const row2y = row1y+TH+GAP;
-  const row2x0 = Math.round((W - 2*TW - GAP)/2);
-  const row2xs  = [row2x0, row2x0+TW+GAP];
-  const coords = [...row1xs.map(x=>[x,row1y]), ...row2xs.map(x=>[x,row2y])];
-
-  coords.forEach(([tx,ty],i) => {
-    const p   = PROVIDERS[i];
-    const st  = STATE[p.id];
-    const pct = st.pct || 0;
-    const ok  = st.connected;
-
-    // Card bg
-    ctx.fillStyle = C.surface;
-    ctx.beginPath(); ctx.roundRect(tx,ty,TW,TH,10); ctx.fill();
-    // Left accent bar
-    ctx.fillStyle = p.color;
-    ctx.beginPath(); ctx.roundRect(tx,ty,3,TH,3); ctx.fill();
-
-    // Provider short name
-    ctx.fillStyle = p.color;
-    ctx.font = 'bold 10px -apple-system,sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(p.short, tx+8, ty+15);
-
-    // Connection dot
-    ctx.beginPath(); ctx.arc(tx+TW-10, ty+10, 5, 0, Math.PI*2);
-    ctx.fillStyle = ok ? C.green : C.red;
-    ctx.fill();
-
-    // Mascot (60×60 at scale 3)
-    const mcx = tx + TW/2, mcy = ty+20+30; // center of mascot
-    drawMascot(ctx, p.mascot, p.id, mcx, mcy, 60);
-
-    // Glow under mascot when active
-    if(ok && pct > 0) {
-      const grd = ctx.createRadialGradient(mcx,mcy,5,mcx,mcy,36);
-      grd.addColorStop(0, p.color+'40'); grd.addColorStop(1,'transparent');
-      ctx.fillStyle = grd;
-      ctx.beginPath(); ctx.ellipse(mcx,mcy+28,28,8,0,0,Math.PI*2); ctx.fill();
-    }
-
-    // Pct label
-    ctx.textAlign = 'center';
-    ctx.fillStyle = ok ? C.text : C.dim;
-    ctx.font = 'bold 16px -apple-system,sans-serif';
-    ctx.fillText(ok ? pct+'%' : '—', tx+TW/2, ty+TH-32);
-
-    // Bar
-    drawBar(ctx, tx+8, ty+TH-18, TW-16, 7, pct, 3);
-  });
-
-  drawNavDots(ctx, 0);
-}
-
-// ── Screen 1–5: Per-provider ──────────────────────────────────────────────────
-function renderProvider(ctx, provIdx) {
-  const p   = PROVIDERS[provIdx];
-  const st  = STATE[p.id];
-  const ok  = st.connected;
-
-  ctx.fillStyle = C.bg; ctx.fillRect(0,0,W,H);
-  drawStatusBar(ctx);
-
-  // Provider header bar
-  ctx.fillStyle = C.surface;
-  ctx.fillRect(0,36,W,44);
-  // Left accent
-  ctx.fillStyle = p.color;
-  ctx.fillRect(0,36,3,44);
-  // Name
-  ctx.fillStyle = C.text;
-  ctx.font = 'bold 18px -apple-system,sans-serif';
-  ctx.textAlign = 'left';
-  ctx.fillText(p.name, 14, 64);
-  // Badge
-  const badgeW = drawBadge(ctx, W-14-(ok?100:80), 47, ok?'CONNECTED':'OFFLINE', ok);
-  // Separator
-  ctx.fillStyle = C.border;
-  ctx.fillRect(0,79,W,1);
-
-  // ── Mascot area ──────────────────────────────────────────────────────────
-  const mcx = W/2, mcy = 175;
-  const mascotSize = 120;
-
-  // Glow ring
-  if(ok) {
-    const glowR = mascotSize/2 + 20;
-    const grd = ctx.createRadialGradient(mcx,mcy,mascotSize/2-10,mcx,mcy,glowR+12);
-    grd.addColorStop(0, p.color+'35');
-    grd.addColorStop(0.6, p.color+'15');
-    grd.addColorStop(1,'transparent');
-    ctx.fillStyle=grd;
-    ctx.beginPath(); ctx.arc(mcx,mcy,glowR+12,0,Math.PI*2); ctx.fill();
-  }
-
-  // Mascot bg circle
-  ctx.fillStyle = C.surface;
-  ctx.beginPath(); ctx.arc(mcx,mcy,mascotSize/2+12,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle = ok ? p.color : C.border;
-  ctx.lineWidth = ok ? 2 : 1;
-  ctx.beginPath(); ctx.arc(mcx,mcy,mascotSize/2+12,0,Math.PI*2); ctx.stroke();
-
-  drawMascot(ctx, p.mascot, p.id, mcx, mcy, mascotSize);
-
-  // Activity arc (pct as arc around mascot)
-  if(ok && st.pct > 0) {
-    ctx.strokeStyle = p.color;
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    ctx.globalAlpha = 0.7;
-    ctx.beginPath();
-    ctx.arc(mcx,mcy, mascotSize/2+12, -Math.PI/2, -Math.PI/2 + (st.pct/100)*Math.PI*2);
-    ctx.stroke();
-    ctx.globalAlpha = 1;
-  }
-
-  // State label under mascot
-  const mStKey = getMascotState(p.id);
-  const stateLabels = {idle:'Idle',thinking:'Thinking…',excited:'Busy!',sleeping:'Sleeping',offline:'Offline'};
-  ctx.fillStyle = ok ? p.color : C.dim;
-  ctx.font = '11px -apple-system,sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(stateLabels[mStKey]||'', mcx, 250);
-
-  // ── Usage bars ────────────────────────────────────────────────────────────
-  if(ok) {
-    // Session
-    ctx.fillStyle = C.dim; ctx.font='11px -apple-system,sans-serif';
-    ctx.textAlign='left';
-    ctx.fillText('Session', 16, 274);
-    ctx.fillStyle=C.text; ctx.font='bold 11px -apple-system,sans-serif';
-    ctx.textAlign='right';
-    ctx.fillText(st.pct+'%  '+fmtTok(st.tokens||0)+' / '+fmtTok(st.limit||0), W-16, 274);
-    drawBar(ctx, 16, 278, W-32, 12, st.pct, 5);
-
-    // Period
-    ctx.fillStyle=C.dim; ctx.font='11px -apple-system,sans-serif';
-    ctx.textAlign='left';
-    ctx.fillText('Period', 16, 306);
-    ctx.fillStyle=C.text; ctx.font='bold 11px -apple-system,sans-serif';
-    ctx.textAlign='right';
-    ctx.fillText(st.pct2+'%', W-16, 306);
-    drawBar(ctx, 16, 310, W-32, 12, st.pct2, 5);
-
-    // Stats row
-    const sw=(W-40)/3, sy=332;
-    drawStatBox(ctx, 16,            sy, sw, 66, 'Cost (session)', fmtCost(st.cost||0));
-    drawStatBox(ctx, 16+sw+8,       sy, sw, 66, 'Rate limit reset', fmtReset(st.reset||0));
-    drawStatBox(ctx, 16+2*(sw+8),   sy, sw, 66, 'Active model', st.model||'—');
-
-    // Token velocity mini-chart (mock)
-    drawMiniVelocity(ctx, 16, 408, W-32, 36, p.color);
-  } else {
-    ctx.fillStyle = C.dim;
-    ctx.font = '14px -apple-system,sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(st.error||'Not configured', W/2, 295);
-    // Configure hint
-    ctx.fillStyle = C.surface2;
-    ctx.beginPath(); ctx.roundRect(W/2-80,310,160,32,8); ctx.fill();
-    ctx.fillStyle = C.dim;
-    ctx.font = '12px -apple-system,sans-serif';
-    ctx.fillText('⚙  Configure in Settings', W/2, 331);
-  }
-
-  drawNavDots(ctx, provIdx+1);
-}
-
-// ── Mini velocity sparkline (mock) ─────────────────────────────────────────
-function drawMiniVelocity(ctx, x, y, w, h, color) {
-  ctx.fillStyle = C.surface;
-  ctx.beginPath(); ctx.roundRect(x,y,w,h,6); ctx.fill();
-  ctx.fillStyle = C.dim; ctx.font='9px -apple-system,sans-serif'; ctx.textAlign='left';
-  ctx.fillText('Token velocity (mock)', x+8, y+12);
-  // Fake sparkline
-  const pts=20; const t=Date.now()/800;
-  ctx.strokeStyle = color+'cc'; ctx.lineWidth=1.5; ctx.lineJoin='round';
+// ── Battery icon (right side of header) ───────────────────────────────
+function drawBattery(ctx, x, y, level) {
+  // 48×48 visual area, battery body 38×18 + nub
+  const bw = 38, bh = 18;
+  const bx = x, by = y + 14;
+  ctx.strokeStyle = T.text;
+  ctx.lineWidth = 2;
   ctx.beginPath();
-  for(let i=0;i<pts;i++){
-    const xi=x+8+(w-16)*i/(pts-1);
-    const yi=y+h-6 - (Math.sin(t+i*0.7)+1)*((h-22)/2);
-    i===0?ctx.moveTo(xi,yi):ctx.lineTo(xi,yi);
-  }
+  ctx.roundRect(bx, by, bw, bh, 3);
   ctx.stroke();
+  // Nub
+  ctx.fillStyle = T.text;
+  ctx.fillRect(bx + bw, by + 5, 3, 8);
+  // Fill
+  const innerPad = 3;
+  const fillW = (bw - innerPad*2) * level;
+  if (fillW > 0) {
+    ctx.fillStyle = T.text;
+    ctx.beginPath();
+    ctx.roundRect(bx + innerPad, by + innerPad, fillW, bh - innerPad*2, 1);
+    ctx.fill();
+  }
 }
 
-// ── Screen 6: Tasks ───────────────────────────────────────────────────────────
-function renderTasks(ctx) {
-  ctx.fillStyle = C.bg; ctx.fillRect(0,0,W,H);
-  drawStatusBar(ctx);
+// ── Header — small mascot, serif title, battery ──────────────────────
+function drawHeader(ctx, title, provIdx) {
+  // Small mascot top-left (32×32 sprite at scale 1.6 = ~32px)
+  const mascotX = L.margin, mascotY = L.margin + 2;
+  if (provIdx >= 0) {
+    const p = PROVIDERS[provIdx];
+    drawMascot(ctx, p.mascot, p.id, mascotX + 16, mascotY + 16, 32);
+  }
+  // Title - serif font, centered
+  ctx.fillStyle = T.text;
+  ctx.font = '700 44px "Playfair Display", "Tiempos", Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText(title, W/2, 58);
+  // Battery
+  drawBattery(ctx, W - L.margin - 38, L.margin, 0.85);
+}
 
-  ctx.fillStyle = C.dim;
-  ctx.font = 'bold 11px -apple-system,sans-serif';
+// ── Panel (rounded card) ────────────────────────────────────────────────
+function drawPanel(ctx, x, y, w, h) {
+  ctx.fillStyle = T.panel;
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, L.panel_r); ctx.fill();
+}
+
+// ── Pill badge (e.g. "Current", "Weekly") ─────────────────────────────
+function drawPill(ctx, x, y, text, isRight) {
+  ctx.font = '500 18px "Inter", -apple-system, sans-serif';
+  const tw = ctx.measureText(text).width;
+  const pw = tw + L.pill_pad_x*2;
+  const ph = 32;
+  const px = isRight ? x - pw : x;
+  ctx.fillStyle = '#2a2a28';
+  ctx.beginPath(); ctx.roundRect(px, y, pw, ph, 16); ctx.fill();
+  ctx.fillStyle = T.dim;
   ctx.textAlign = 'left';
-  ctx.letterSpacing = '0.08em';
-  ctx.fillText('ACTIVE TASKS', 16, 55);
-  ctx.letterSpacing = '0';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, px + L.pill_pad_x, y + ph/2 + 1);
+  return pw;
+}
 
-  ctx.fillStyle = C.border; ctx.fillRect(0,60,W,1);
+// ── Progress bar (24px tall, rounded) ──────────────────────────────────
+function drawBar(ctx, x, y, w, pct) {
+  ctx.fillStyle = T.bar_bg;
+  ctx.beginPath(); ctx.roundRect(x, y, w, L.bar_h, L.bar_r); ctx.fill();
+  const fw = Math.max(0, Math.min(w, w * pct / 100));
+  if (fw > 0) {
+    ctx.fillStyle = bar_color(pct);
+    ctx.beginPath(); ctx.roundRect(x, y, fw, L.bar_h, L.bar_r); ctx.fill();
+  }
+}
 
-  const cardH=70, gap=6;
-  TASKS.forEach((task,i)=>{
-    const ty=66+i*(cardH+gap);
-    const p=PROVIDERS[task.prov];
-    const total=task.ti+task.to;
-    const pct=Math.min(100,Math.round(total*100/task.limit));
+// ── Spinner + animated message (bottom of usage screens) ──────────────
+function drawSpinnerLine(ctx, y) {
+  const spinIdx = Math.floor(Date.now() / 130) % SPINNER_FRAMES.length;
+  const msg = ANIM_MESSAGES[messageIdx];
+  ctx.fillStyle = T.accent;
+  ctx.font = '500 22px "JetBrains Mono", ui-monospace, monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText(`${SPINNER_FRAMES[spinIdx]}  ${msg}…`, W/2, y);
+}
 
-    ctx.fillStyle=C.surface;
-    ctx.beginPath(); ctx.roundRect(12,ty,W-24,cardH,8); ctx.fill();
-    // Provider accent
-    ctx.fillStyle=p.color;
-    ctx.beginPath(); ctx.roundRect(12,ty,3,cardH,3); ctx.fill();
+// ── Screen 0: Splash with full-screen animated mascot ─────────────────
+function renderSplash(ctx) {
+  ctx.fillStyle = T.bg;
+  ctx.fillRect(0, 0, W, H);
+  // Big centred Clawd (scale 18 → 360px)
+  const size = 360;
+  drawMascot(ctx, 'clawd', 'claude', W/2, H/2, size, SPLASH_ANIM);
+  // Tap hint
+  ctx.fillStyle = T.dim;
+  ctx.font = '400 14px "Inter", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Tap to continue', W/2, H - 30);
+}
 
-    // Status dot
-    ctx.fillStyle=C.green;
-    ctx.beginPath(); ctx.arc(26,ty+18,4,0,Math.PI*2); ctx.fill();
-    // Pulse ring
-    ctx.strokeStyle=C.green+'44'; ctx.lineWidth=2;
-    ctx.beginPath(); ctx.arc(26,ty+18,7+Math.sin(Date.now()/300)*2,0,Math.PI*2); ctx.stroke();
+// ── Per-provider Usage screen (matches original exactly) ──────────────
+function renderProviderUsage(ctx, provIdx) {
+  const p = PROVIDERS[provIdx];
+  const s = STATE[p.id];
+  ctx.fillStyle = T.bg;
+  ctx.fillRect(0, 0, W, H);
+  drawHeader(ctx, p.name, provIdx);
 
-    // Label
-    ctx.fillStyle=C.text; ctx.font='bold 12px -apple-system,sans-serif'; ctx.textAlign='left';
-    const lbl=task.label.length>40?task.label.slice(0,38)+'…':task.label;
-    ctx.fillText(lbl, 36, ty+20);
+  if (!s.connected) {
+    drawPanel(ctx, L.margin, L.panel_y + 40, L.content_w, 80);
+    ctx.fillStyle = T.dim;
+    ctx.font = '500 22px "Inter", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(s.error || 'Not configured', W/2, L.panel_y + 90);
+    // Offline spinner
+    ctx.fillStyle = T.dim;
+    ctx.font = '500 18px "JetBrains Mono", ui-monospace, monospace';
+    ctx.fillText('· Sleeping…', W/2, H - 36);
+    return;
+  }
 
-    // Model tag
-    ctx.fillStyle=C.border;
-    const tagW=ctx.measureText(task.model).width+14;
-    ctx.beginPath(); ctx.roundRect(W-14-tagW,ty+8,tagW,18,4); ctx.fill();
-    ctx.fillStyle=C.dim; ctx.font='10px -apple-system,sans-serif'; ctx.textAlign='left';
-    ctx.fillText(task.model, W-14-tagW+7, ty+20);
+  // Panel 1: Current
+  const p1y = L.panel_y;
+  drawPanel(ctx, L.margin, p1y, L.content_w, L.panel_h);
+  // Big % label
+  ctx.fillStyle = T.text;
+  ctx.font = '700 56px "Playfair Display", Georgia, serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText(fmt_pct(s.pct), L.margin + L.panel_pad_x, p1y + 56);
+  // "Current" pill on right
+  drawPill(ctx, W - L.margin - L.panel_pad_x, p1y + 16, 'Current', true);
+  // Bar
+  drawBar(ctx, L.margin + L.panel_pad_x, p1y + 76,
+          L.content_w - L.panel_pad_x*2, s.pct);
+  // Reset timer
+  ctx.fillStyle = T.dim;
+  ctx.font = '500 20px "Inter", sans-serif';
+  ctx.fillText(fmt_reset(s.reset_h || 0, s.reset_m || 0),
+               L.margin + L.panel_pad_x, p1y + L.panel_h - 18);
 
-    // Meta
-    ctx.fillStyle=C.dim; ctx.font='10px -apple-system,sans-serif';
-    ctx.fillText(fmtTok(total)+' tokens · '+pct+'%', 36, ty+36);
+  // Panel 2: Weekly
+  const p2y = p1y + L.panel_h + L.panel_gap;
+  drawPanel(ctx, L.margin, p2y, L.content_w, L.panel_h);
+  ctx.fillStyle = T.text;
+  ctx.font = '700 56px "Playfair Display", Georgia, serif';
+  ctx.fillText(fmt_pct(s.pct2), L.margin + L.panel_pad_x, p2y + 56);
+  drawPill(ctx, W - L.margin - L.panel_pad_x, p2y + 16, 'Weekly', true);
+  drawBar(ctx, L.margin + L.panel_pad_x, p2y + 76,
+          L.content_w - L.panel_pad_x*2, s.pct2);
+  ctx.fillStyle = T.dim;
+  ctx.font = '500 20px "Inter", sans-serif';
+  ctx.fillText(fmt_week(s.week_d || 0, s.week_h || 0),
+               L.margin + L.panel_pad_x, p2y + L.panel_h - 18);
 
-    // Progress bar
-    drawBar(ctx, 36, ty+44, W-52, 8, pct, 4);
+  // Bottom spinner + message
+  drawSpinnerLine(ctx, H - 30);
+}
+
+// ── Tasks screen ──────────────────────────────────────────────────────
+function renderTasks(ctx) {
+  ctx.fillStyle = T.bg;
+  ctx.fillRect(0, 0, W, H);
+  drawHeader(ctx, 'Tasks', 0);
+
+  const cardH = 88, gap = 12;
+  TASKS.forEach((task, i) => {
+    const ty = L.panel_y + i * (cardH + gap);
+    const p = PROVIDERS[task.prov];
+    const total = task.ti + task.to;
+    const pct = Math.min(100, Math.round(total*100 / task.limit));
+
+    drawPanel(ctx, L.margin, ty, L.content_w, cardH);
+    // Tiny accent stripe
+    ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.roundRect(L.margin, ty, 4, cardH, 2); ctx.fill();
+
+    // Task label
+    ctx.fillStyle = T.text;
+    ctx.font = '600 18px "Inter", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    const lbl = task.label.length > 32 ? task.label.slice(0,30)+'…' : task.label;
+    ctx.fillText(lbl, L.margin + L.panel_pad_x + 4, ty + 26);
+
+    // Model + tokens
+    ctx.fillStyle = T.dim;
+    ctx.font = '500 14px "Inter", sans-serif';
+    ctx.fillText(`${task.model} · ${fmt_tok(total)} tokens`,
+                 L.margin + L.panel_pad_x + 4, ty + 46);
+
+    // Mini bar
+    drawBar(ctx, L.margin + L.panel_pad_x + 4, ty + 56,
+            L.content_w - L.panel_pad_x*2 - 4, pct);
+
+    // Pct (small, right)
+    ctx.fillStyle = T.dim;
+    ctx.font = '500 13px "JetBrains Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(pct + '%', W - L.margin - L.panel_pad_x, ty + 46);
   });
 
-  drawNavDots(ctx, 6);
+  drawSpinnerLine(ctx, H - 30);
 }
 
-// ── Main render dispatch ─────────────────────────────────────────────────────
-function renderScreen(ctx2, screenIdx) {
-  if(screenIdx===0) renderOverview(ctx2);
-  else if(screenIdx>=1&&screenIdx<=5) renderProvider(ctx2, screenIdx-1);
-  else renderTasks(ctx2);
+// ── Bluetooth screen ──────────────────────────────────────────────────
+function renderBluetooth(ctx) {
+  ctx.fillStyle = T.bg;
+  ctx.fillRect(0, 0, W, H);
+  drawHeader(ctx, 'Bluetooth', 0);
+
+  // Status panel
+  const p1y = L.panel_y;
+  drawPanel(ctx, L.margin, p1y, L.content_w, 110);
+  // BLE icon
+  ctx.fillStyle = T.text;
+  ctx.font = '600 28px "Inter", sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText('⎈', L.margin + 18, p1y + 38);
+  // Status
+  ctx.fillStyle = bleConnected ? T.green : T.red;
+  ctx.font = '600 32px "Inter", sans-serif';
+  ctx.fillText(bleConnected ? 'Connected' : 'Disconnected', L.margin + 56, p1y + 40);
+  // Device info
+  ctx.fillStyle = T.dim;
+  ctx.font = '500 17px "Inter", sans-serif';
+  ctx.fillText('Device: Claude Controller', L.margin + 18, p1y + 70);
+  ctx.fillText('Address: 1C:DB:D4:48:EA:09', L.margin + 18, p1y + 92);
+
+  // Reset panel
+  const p2y = p1y + 110 + L.panel_gap;
+  drawPanel(ctx, L.margin, p2y, L.content_w, 76);
+  ctx.fillStyle = T.text;
+  ctx.font = '500 22px "Inter", sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('🗑  Reset Bluetooth', L.margin + 18, p2y + 46);
+
+  // Credits
+  ctx.fillStyle = T.dim;
+  ctx.font = '500 16px "Inter", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Built by @hermannbjorgvin', W/2, H - 60);
+  ctx.font = '500 13px "Inter", sans-serif';
+  ctx.fillText('Clawd animations by @amaanbuilds', W/2, H - 36);
 }
 
-// ── Animation loop ────────────────────────────────────────────────────────────
-let lastTime = 0;
+// ── Main render dispatch ────────────────────────────────────────────────
+function renderScreen(ctx, idx) {
+  if (idx === 0) renderSplash(ctx);
+  else if (idx >= 1 && idx <= 5) renderProviderUsage(ctx, idx - 1);
+  else if (idx === 6) renderTasks(ctx);
+  else if (idx === 7) renderBluetooth(ctx);
+}
 
-function advance(timestamp) {
-  const dt = Math.min(timestamp - lastTime, 100);
-  lastTime = timestamp;
+// ── Animation loop ──────────────────────────────────────────────────────
+let lastT = 0;
+function tick(t) {
+  const dt = Math.min(t - lastT, 100);
+  lastT = t;
 
-  // Auto-advance
-  if(autoAdvance) {
+  // Rotate message every 4s
+  messageElapsed += dt;
+  if (messageElapsed >= 4000) {
+    messageElapsed = 0;
+    messageIdx = (messageIdx + 1) % ANIM_MESSAGES.length;
+  }
+
+  // Auto-advance screens
+  if (autoAdvance) {
     autoTimer += dt;
-    if(autoTimer >= AUTO_MS) {
-      autoTimer = 0;
-      startTransition((curScreen+1)%NSCREENS);
-    }
+    if (autoTimer >= AUTO_MS) { autoTimer = 0; startTrans((curScreen+1)%NSCREENS); }
   }
 
   // Advance mascot frames
-  PROVIDERS.forEach(p=>{
+  PROVIDERS.forEach(p => {
     const mSt = getMascotState(p.id);
-    const anim = MANIM[p.mascot];
-    anim.elapsed += dt;
-    const hold = getMascotHold(p.mascot, mSt, anim.frame);
-    if(anim.elapsed >= hold) {
-      anim.elapsed -= hold;
-      anim.frame = (anim.frame+1) % getMascotFrameCount(p.mascot, mSt);
+    const a = MANIM[p.mascot];
+    a.elapsed += dt;
+    const hold = getHold(p.mascot, mSt, a.frame);
+    if (a.elapsed >= hold) {
+      a.elapsed -= hold;
+      const data = getFrameData(p.mascot, mSt, a.frame);
+      const fc = data ? data.frames.length : 4;
+      a.frame = (a.frame + 1) % fc;
     }
   });
+  // Splash mascot
+  SPLASH_ANIM.elapsed += dt;
+  const sH = getHold('clawd','idle',SPLASH_ANIM.frame);
+  if (SPLASH_ANIM.elapsed >= sH) {
+    SPLASH_ANIM.elapsed -= sH;
+    const sd = getFrameData('clawd','idle',SPLASH_ANIM.frame);
+    SPLASH_ANIM.frame = (SPLASH_ANIM.frame + 1) % (sd ? sd.frames.length : 16);
+  }
 
-  // Handle transition
-  if(transition.active) {
+  // Transition or direct draw
+  if (transition.active) {
     transition.t += dt;
-    const progress = Math.min(1, transition.t / transition.dur);
-    const ease = 1 - Math.pow(1-progress,3); // ease-out cubic
-
-    // Render from screen into offscreen1, to screen into offscreen2
-    renderScreen(offscreen1.getContext('2d'), transition.from);
-    renderScreen(offscreen2.getContext('2d'), transition.to);
-
+    const p = Math.min(1, transition.t / transition.dur);
+    const e = 1 - Math.pow(1-p, 3);
+    renderScreen(off1.getContext('2d'), transition.from);
+    renderScreen(off2.getContext('2d'), transition.to);
     CTX.clearRect(0,0,W,H);
-    // From screen slides left
-    CTX.drawImage(offscreen1, -ease*W, 0);
-    // To screen comes in from right
-    CTX.drawImage(offscreen2, (1-ease)*W, 0);
-
-    if(progress >= 1) {
+    CTX.drawImage(off1, -e*W, 0);
+    CTX.drawImage(off2, (1-e)*W, 0);
+    if (p >= 1) {
       transition.active = false;
       curScreen = transition.to;
-      updateTabHighlight();
+      updateTabs();
     }
   } else {
     renderScreen(CTX, curScreen);
   }
 
-  requestAnimationFrame(advance);
+  requestAnimationFrame(tick);
 }
 
-function startTransition(to) {
-  if(transition.active) {
-    curScreen = transition.to;
-    transition.active = false;
-  }
-  transition = { active:true, from:curScreen, to, t:0, dur:280 };
-  autoTimer = 0;
-  updateTabHighlight();
+function startTrans(to) {
+  if (transition.active) { curScreen = transition.to; transition.active = false; }
+  transition = { active: true, from: curScreen, to, t: 0, dur: 320 };
+  autoTimer = 0; updateTabs();
 }
-
-// ── Controls ──────────────────────────────────────────────────────────────────
-function goScreen(n) { startTransition(n); }
-function cycleNext() { startTransition((curScreen+1)%NSCREENS); }
-
+function goScreen(n) { startTrans(n); }
+function cycleNext() { startTrans((curScreen+1)%NSCREENS); }
 function toggleAuto() {
-  autoAdvance = !autoAdvance;
-  autoTimer   = 0;
-  document.getElementById('auto-btn').textContent =
-    autoAdvance ? '⏸ Pause Auto' : '▶ Resume Auto';
+  autoAdvance = !autoAdvance; autoTimer = 0;
+  document.getElementById('auto-btn').textContent = autoAdvance ? '⏸ Pause' : '▶ Play';
 }
-
 function toggleBLE() {
   bleConnected = !bleConnected;
-  document.getElementById('ble-btn').textContent =
-    bleConnected ? 'BLE: Connected' : 'BLE: Offline';
-  document.getElementById('ble-btn').classList.toggle('active', !bleConnected);
+  const b = document.getElementById('ble-btn');
+  b.textContent = bleConnected ? 'BLE: On' : 'BLE: Off';
+  b.classList.toggle('on', !bleConnected);
 }
-
-function updateTabHighlight() {
-  const tabs = document.getElementById('screen-tabs').children;
-  for(let i=0;i<tabs.length;i++)
-    tabs[i].classList.toggle('on', i===curScreen);
+function updateTabs() {
+  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('on', i===curScreen));
 }
+document.getElementById('screen-frame').addEventListener('click', () => startTrans((curScreen+1)%NSCREENS));
 
-document.getElementById('screen-frame').addEventListener('click', ()=>{
-  startTransition((curScreen+1)%NSCREENS);
-});
-
-// Kick off
-requestAnimationFrame(advance);
+requestAnimationFrame(tick);
 </script>
+
 </body>
 </html>
