@@ -3,7 +3,7 @@
     "enabled": true,
     "api_key": ""
   },
-  "openai": {
+  "openai/codex": {
     "enabled": true,
     "api_key": "sk-..."
   },
