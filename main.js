@@ -261,6 +261,11 @@ app.whenReady().then(() => {
 
   tracker.start();
 
+  // Push task updates to dashboard on a 10-second interval
+  setInterval(() => {
+    broadcast('task-update', tracker.getTasks());
+  }, 10000);
+
   // Wire poller events → broadcast
   poller.on('usage-update', state => {
     broadcast('usage-update', state);

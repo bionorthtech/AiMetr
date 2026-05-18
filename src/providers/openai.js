@@ -42,6 +42,7 @@ async function fetchUsage() {
 
   try {
     const res = await fetch('https://api.openai.com/v1/models', {
+      timeout: 8000,
       headers: { Authorization: `Bearer ${apiKey}` },
     });
 

@@ -77,6 +77,7 @@ async function fetchUsage() {
   try {
     const res = await fetch('https://api.anthropic.com/v1/models', {
       method: 'GET',
+      timeout: 8000,
       headers: {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',

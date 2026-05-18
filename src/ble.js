@@ -16,8 +16,8 @@ try {
 }
 
 const TARGET_NAME = 'Claude Controller';
-const SERVICE_UUID = 'battery_service'; // placeholder; replace with actual Clawdmeter UUID
-const CHAR_UUID    = 'battery_level';   // placeholder
+const SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b'; // Clawdmeter primary service
+const CHAR_UUID    = 'beb5483e-36e1-4688-b7f5-ea07361b26a8'; // Clawdmeter notify characteristic
 
 function isAvailable() { return available; }
 

@@ -1,15 +1,34 @@
 {
-  "name": "clawdmeter",
+  "name": "aimetr",
   "version": "2.0.0",
-  "description": "Clawdmeter — multi-provider AI usage monitor for ESP32 AMOLED device + desktop companion",
+  "description": "AIMetr — multi-provider AI usage monitor with desktop pet. Tracks Claude, OpenAI, DeepSeek, Ollama and LM Studio in real time. Pairs with ESP32-S3 AMOLED hardware.",
   "main": "main.js",
+  "author": "bionorthtech",
+  "license": "MIT",
+  "keywords": [
+    "ai",
+    "usage-monitor",
+    "claude",
+    "anthropic",
+    "openai",
+    "deepseek",
+    "ollama",
+    "lm-studio",
+    "electron",
+    "desktop-pet",
+    "esp32",
+    "rate-limit"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bionorthtech/test"
+  },
   "scripts": {
     "start": "electron .",
     "dev": "NODE_ENV=development electron .",
     "build": "electron-builder"
   },
   "dependencies": {
-    "chart.js": "^4.5.1",
     "electron-store": "^8.1.0",
     "node-fetch": "^2.7.0"
   },

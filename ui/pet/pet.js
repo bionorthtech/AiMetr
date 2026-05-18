@@ -188,9 +188,20 @@ window.api.on('usage-update', usageData => {
 // ── Init ──────────────────────────────────────────────────────────────────────
 startAnimation('idle');
 
-// Request initial data
+// Seed the pet from the current usage state immediately on load
 window.api.invoke('get-all-usage').then(data => {
-  if (data) window.api.on && window.dispatchEvent(
-    new CustomEvent('_usage', { detail: data })
-  );
+  if (!data) return;
+  let maxPct = 0, activeProv = 'claude';
+  Object.entries(data).forEach(([id, s]) => {
+    if (s && s.connected) {
+      const pct = s.session?.pct || 0;
+      if (pct > maxPct) { maxPct = pct; activeProv = id; }
+    }
+  });
+  updateUsageBar(maxPct);
+  const newState =
+    maxPct >= 75 ? 'excited' :
+    maxPct >= 10 ? 'thinking' :
+    maxPct >  0  ? 'idle'     : 'sleeping';
+  setState(newState, activeProv);
 });

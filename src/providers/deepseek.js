@@ -31,6 +31,7 @@ async function fetchUsage() {
   try {
     // DeepSeek uses an OpenAI-compatible API
     const res = await fetch(`${BASE_URL}/v1/models`, {
+      timeout: 8000,
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',

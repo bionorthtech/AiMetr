@@ -67,7 +67,7 @@ class Poller extends EventEmitter {
     const results = await Promise.allSettled(
       enabled.map(async p => {
         const b = backoff[p.id];
-        if (now < b.nextAllowedAt) return this._state[p.id]; // skip, still cooling
+        if (now < b.nextAllowedAt) return { id: p.id, usage: this._state[p.id] }; // skip, still cooling
 
         try {
           const usage = await p.fetchUsage();

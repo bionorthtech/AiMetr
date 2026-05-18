@@ -120,7 +120,7 @@ function _parseSession(filePath, projectDir) {
     model,
     tokensIn,
     tokensOut,
-    tokensLimit: 100000,
+    tokensLimit: 200000,
     startedAt: lastActivity - (lines.length * 2000),
     lastActivity,
     status,
