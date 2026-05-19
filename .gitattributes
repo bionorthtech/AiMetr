@@ -1,0 +1,4 @@
+# GitHub language stats: highlight the Electron app, not ESP-IDF firmware blobs
+firmware/** linguist-vendored
+assets/** linguist-vendored
+ui/dashboard/vendor/** linguist-vendored

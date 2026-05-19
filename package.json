@@ -23,6 +23,7 @@
     "type": "git",
     "url": "https://github.com/bionorthtech/AiMetr"
   },
+  "homepage": "https://github.com/bionorthtech/AiMetr#readme",
   "scripts": {
     "start": "electron .",
     "dev": "NODE_ENV=development electron .",
