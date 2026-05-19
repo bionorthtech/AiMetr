@@ -1,7 +1,7 @@
 'use strict';
 
-const fetch = require('node-fetch');
-const { getProviderConfig } = require('../store');
+const { fetchWithTimeout } = require('../fetch');
+const { getProviderApiKey } = require('../store');
 
 const MODELS = [
   'gpt-4o',
@@ -29,11 +29,93 @@ const MODEL_COSTS = {
   'code-davinci-002': { input: 2.00,   output: 2.00   },
 };
 
+const ORG_DAILY_LIMIT = 10_000_000;
+
 function getApiKey() {
-  const cfg = getProviderConfig('openai');
-  if (cfg.apiKey && cfg.apiKey.length > 10) return cfg.apiKey;
+  const stored = getProviderApiKey('openai');
+  if (stored && stored.length > 10) return stored;
   if (process.env.OPENAI_API_KEY) return process.env.OPENAI_API_KEY;
   return null;
+}
+
+async function fetchUsageFromUsageApi(apiKey) {
+  const today = new Date().toISOString().slice(0, 10);
+  const res = await fetchWithTimeout(
+    `https://api.openai.com/v1/usage?date=${today}`,
+    { headers: { Authorization: `Bearer ${apiKey}` } },
+    10000
+  );
+
+  if (!res.ok) return null;
+
+  const body = await res.json();
+  const data = body.data || [];
+  const totalCtx = data.reduce((s, d) => s + (d.n_context_tokens_total || 0), 0);
+  const totalGen = data.reduce((s, d) => s + (d.n_generated_tokens_total || 0), 0);
+  const totalTokens = totalCtx + totalGen;
+
+  const cost = (totalCtx / 1e6 * 2.50) + (totalGen / 1e6 * 10.00);
+
+  const modelCounts = {};
+  data.forEach(d => {
+    const m = d.snapshot_id || '';
+    modelCounts[m] = (modelCounts[m] || 0) + (d.n_context_tokens_total || 0);
+  });
+  const activeModel = Object.keys(modelCounts).length
+    ? Object.entries(modelCounts).sort((a, b) => b[1] - a[1])[0][0]
+    : MODELS[0];
+
+  const pct = Math.min(100, Math.round((totalTokens * 100) / ORG_DAILY_LIMIT));
+
+  return {
+    provider: 'openai',
+    connected: true,
+    error: null,
+    session: { used: totalTokens, limit: ORG_DAILY_LIMIT, resetAt: 0, pct },
+    period:  { used: totalTokens, limit: ORG_DAILY_LIMIT, resetAt: 0, pct },
+    cost:    { session: Math.round(cost * 10000) / 10000, period: Math.round(cost * 10000) / 10000 },
+    models: MODELS,
+    activeModel: activeModel.slice(0, 40) || MODELS[0],
+    lastFetched: Date.now(),
+  };
+}
+
+async function fetchUsageFromModelsApi(apiKey) {
+  const res = await fetchWithTimeout('https://api.openai.com/v1/models', {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  }, 8000);
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error?.message || String(res.status));
+  }
+
+  const remaining = parseInt(res.headers.get('x-ratelimit-remaining-tokens') || '0', 10);
+  const limit     = parseInt(res.headers.get('x-ratelimit-limit-tokens')     || '90000', 10);
+  const resetStr  = res.headers.get('x-ratelimit-reset-tokens');
+  const resetAt   = resetStr ? Date.now() + parseResetDuration(resetStr) : Date.now() + 60000;
+  const used = Math.max(0, limit - remaining);
+  const pct  = limit > 0 ? Math.round((used / limit) * 100) : 0;
+
+  return {
+    provider: 'openai',
+    connected: true,
+    error: null,
+    session: { used, limit, resetAt, pct },
+    period:  { used, limit, resetAt, pct },
+    cost:    { session: 0, period: 0 },
+    models: MODELS,
+    activeModel: MODELS[0],
+    lastFetched: Date.now(),
+  };
+}
+
+function parseResetDuration(str) {
+  let ms = 0;
+  const h = str.match(/(\d+)h/); if (h) ms += parseInt(h[1]) * 3600000;
+  const m = str.match(/(\d+)m/); if (m) ms += parseInt(m[1]) * 60000;
+  const s = str.match(/(\d+)s/); if (s) ms += parseInt(s[1]) * 1000;
+  return ms || 60000;
 }
 
 async function fetchUsage() {
@@ -41,46 +123,12 @@ async function fetchUsage() {
   if (!apiKey) return emptyResult('No OpenAI API key configured.');
 
   try {
-    const res = await fetch('https://api.openai.com/v1/models', {
-      timeout: 8000,
-      headers: { Authorization: `Bearer ${apiKey}` },
-    });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      return emptyResult(`OpenAI error: ${body.error?.message || res.status}`);
-    }
-
-    const remaining = parseInt(res.headers.get('x-ratelimit-remaining-tokens') || '0', 10);
-    const limit     = parseInt(res.headers.get('x-ratelimit-limit-tokens')     || '90000', 10);
-    const resetStr  = res.headers.get('x-ratelimit-reset-tokens');
-    const resetAt   = resetStr ? Date.now() + parseResetDuration(resetStr) : Date.now() + 60000;
-    const used = Math.max(0, limit - remaining);
-    const pct  = limit > 0 ? Math.round((used / limit) * 100) : 0;
-
-    return {
-      provider: 'openai',
-      connected: true,
-      error: null,
-      session: { used, limit, resetAt, pct },
-      period:  { used, limit, resetAt, pct },
-      cost:    { session: 0, period: 0 },
-      models: MODELS,
-      activeModel: MODELS[0],
-      lastFetched: Date.now(),
-    };
+    const usageResult = await fetchUsageFromUsageApi(apiKey);
+    if (usageResult) return usageResult;
+    return await fetchUsageFromModelsApi(apiKey);
   } catch (err) {
     return emptyResult(`OpenAI fetch error: ${err.message}`);
   }
-}
-
-// Parses strings like "6m0s" or "1h2m3s" into ms
-function parseResetDuration(str) {
-  let ms = 0;
-  const h = str.match(/(\d+)h/); if (h) ms += parseInt(h[1]) * 3600000;
-  const m = str.match(/(\d+)m/); if (m) ms += parseInt(m[1]) * 60000;
-  const s = str.match(/(\d+)s/); if (s) ms += parseInt(s[1]) * 1000;
-  return ms || 60000;
 }
 
 function emptyResult(error) {
@@ -104,12 +152,12 @@ function getCredentialFields() {
 }
 
 async function validateCredentials(creds) {
-  const key = creds.apiKey || '';
+  const key = (creds && creds.apiKey) || getApiKey();
   if (!key) return false;
   try {
-    const res = await fetch('https://api.openai.com/v1/models', {
+    const res = await fetchWithTimeout('https://api.openai.com/v1/models', {
       headers: { Authorization: `Bearer ${key}` },
-    });
+    }, 8000);
     return res.ok;
   } catch (_) {
     return false;

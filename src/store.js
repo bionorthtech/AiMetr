@@ -1,15 +1,16 @@
 'use strict';
 
 const Store = require('electron-store');
+const secrets = require('./secrets');
 
 const schema = {
   providers: {
     type: 'object',
     default: {},
     properties: {
-      claude:    { type: 'object', default: { enabled: true,  apiKey: '' } },
-      openai:    { type: 'object', default: { enabled: false, apiKey: '' } },
-      deepseek:  { type: 'object', default: { enabled: false, apiKey: '' } },
+      claude:    { type: 'object', default: { enabled: true,  apiKey: '', keyStoredInKeychain: false } },
+      openai:    { type: 'object', default: { enabled: false, apiKey: '', keyStoredInKeychain: false } },
+      deepseek:  { type: 'object', default: { enabled: false, apiKey: '', keyStoredInKeychain: false } },
       ollama:    { type: 'object', default: { enabled: true,  baseUrl: 'http://localhost:11434' } },
       lmstudio:  { type: 'object', default: { enabled: false, baseUrl: 'http://localhost:1234' } },
     },
@@ -27,9 +28,10 @@ const schema = {
     type: 'object',
     default: {},
     properties: {
-      theme:         { type: 'string',  default: 'dark' },
-      pollInterval:  { type: 'number',  default: 30 },
-      dashboardBounds: { type: 'object', default: {} },
+      theme:             { type: 'string',  default: 'dark' },
+      pollInterval:      { type: 'number',  default: 30 },
+      dashboardBounds:   { type: 'object', default: {} },
+      hasCompletedSetup: { type: 'boolean', default: false },
     },
   },
   history: {
@@ -46,18 +48,29 @@ function getProviderConfig(id) {
 
 function setProviderConfig(id, data) {
   const existing = getProviderConfig(id);
-  store.set(`providers.${id}`, { ...existing, ...data });
+  const merged = { ...existing, ...data };
+
+  if (Object.prototype.hasOwnProperty.call(data, 'apiKey')) {
+    secrets.setApiKey(id, data.apiKey || '');
+    merged.keyStoredInKeychain = secrets.hasStoredKey(id);
+  }
+
+  // Never persist API keys in electron-store for cloud providers (Keychain or memory only)
+  if (secrets.SECRET_PROVIDERS.has(id)) {
+    delete merged.apiKey;
+  }
+
+  store.set(`providers.${id}`, merged);
 }
 
 function getProviderApiKey(id) {
-  return store.get(`providers.${id}.apiKey`, '');
+  return secrets.getApiKey(id);
 }
 
 function addSnapshot(snapshot) {
   const snapshots = store.get('history.snapshots', []);
   const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
   const pruned = snapshots.filter(s => s.ts > cutoff);
-  // Cap at 8640 entries (30 days × 288 polls/day at 5-min intervals)
   if (pruned.length >= 8640) pruned.shift();
   pruned.push(snapshot);
   store.set('history.snapshots', pruned);

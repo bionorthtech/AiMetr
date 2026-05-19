@@ -1,7 +1,7 @@
 'use strict';
 
-const fetch = require('node-fetch');
-const { getProviderConfig } = require('../store');
+const { fetchWithTimeout } = require('../fetch');
+const { getProviderApiKey } = require('../store');
 
 const MODELS = [
   'deepseek-chat',
@@ -18,8 +18,8 @@ const MODEL_COSTS = {
 const BASE_URL = 'https://api.deepseek.com';
 
 function getApiKey() {
-  const cfg = getProviderConfig('deepseek');
-  if (cfg.apiKey && cfg.apiKey.length > 10) return cfg.apiKey;
+  const stored = getProviderApiKey('deepseek');
+  if (stored && stored.length > 10) return stored;
   if (process.env.DEEPSEEK_API_KEY) return process.env.DEEPSEEK_API_KEY;
   return null;
 }
@@ -29,45 +29,38 @@ async function fetchUsage() {
   if (!apiKey) return emptyResult('No DeepSeek API key configured.');
 
   try {
-    // DeepSeek uses an OpenAI-compatible API
-    const res = await fetch(`${BASE_URL}/v1/models`, {
-      timeout: 8000,
+    const balRes = await fetchWithTimeout(`${BASE_URL}/user/balance`, {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-    });
+    }, 10000);
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      return emptyResult(`DeepSeek error: ${body.error?.message || res.status}`);
+    if (!balRes.ok) {
+      const body = await balRes.json().catch(() => ({}));
+      return emptyResult(`DeepSeek error: ${body.error?.message || balRes.status}`);
     }
 
-    // DeepSeek doesn't expose rate-limit headers on the models endpoint;
-    // use balance endpoint if available
-    let balanceUsed = 0, balanceLimit = 0;
-    try {
-      const balRes = await fetch(`${BASE_URL}/user/balance`, {
-        headers: { Authorization: `Bearer ${apiKey}` },
-      });
-      if (balRes.ok) {
-        const bal = await balRes.json();
-        // balance is in USD; normalise to a 0-100% scale against a $10 baseline
-        const usdAvailable = parseFloat(bal.balance_infos?.[0]?.total_balance || '0');
-        balanceUsed  = Math.max(0, 10.0 - usdAvailable);
-        balanceLimit = 10.0;
-      }
-    } catch (_) {}
+    const bal = await balRes.json();
+    const isAvailable = bal.is_available !== false;
+    const infos = bal.balance_infos || [];
+    const usdInfo = infos.find(i => i.currency === 'USD') || infos[0] || {};
 
-    const pct = balanceLimit > 0 ? Math.round((balanceUsed / balanceLimit) * 100) : 0;
+    const total   = parseFloat(usdInfo.total_balance   || '0') || 0;
+    const granted = parseFloat(usdInfo.granted_balance || '0') || 0;
+    const toppedUp = parseFloat(usdInfo.topped_up_balance || '0') || 0;
+
+    const orig = (granted + toppedUp) > 0 ? granted + toppedUp : total + 5;
+    const used = orig > 0 ? Math.max(0, orig - total) : 0;
+    const pct  = orig > 0 ? Math.min(100, Math.round((used / orig) * 100)) : 0;
 
     return {
       provider: 'deepseek',
-      connected: true,
+      connected: isAvailable,
       error: null,
-      session: { used: Math.round(balanceUsed * 1000), limit: Math.round(balanceLimit * 1000), resetAt: 0, pct },
-      period:  { used: Math.round(balanceUsed * 1000), limit: Math.round(balanceLimit * 1000), resetAt: 0, pct },
-      cost:    { session: balanceUsed, period: balanceUsed },
+      session: { used: Math.round(used * 1000), limit: Math.round(orig * 1000), resetAt: 0, pct },
+      period:  { used: Math.round(used * 1000), limit: Math.round(orig * 1000), resetAt: 0, pct },
+      cost:    { session: Math.round(used * 10000) / 10000, period: Math.round(used * 10000) / 10000 },
       models: MODELS,
       activeModel: MODELS[0],
       lastFetched: Date.now(),
@@ -98,12 +91,12 @@ function getCredentialFields() {
 }
 
 async function validateCredentials(creds) {
-  const key = creds.apiKey || '';
+  const key = (creds && creds.apiKey) || getApiKey();
   if (!key) return false;
   try {
-    const res = await fetch(`${BASE_URL}/v1/models`, {
+    const res = await fetchWithTimeout(`${BASE_URL}/v1/models`, {
       headers: { Authorization: `Bearer ${key}` },
-    });
+    }, 8000);
     return res.ok;
   } catch (_) {
     return false;

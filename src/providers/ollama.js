@@ -1,44 +1,42 @@
 'use strict';
 
-const fetch = require('node-fetch');
+const { fetchWithTimeout } = require('../fetch');
 const { getProviderConfig } = require('../store');
 
 const DEFAULT_BASE_URL = 'http://localhost:11434';
 
 function getBaseUrl() {
   const cfg = getProviderConfig('ollama');
-  return cfg.baseUrl || DEFAULT_BASE_URL;
+  return (cfg.baseUrl || DEFAULT_BASE_URL).replace(/\/$/, '');
 }
 
 async function fetchUsage() {
   const base = getBaseUrl();
 
   try {
-    // Check if Ollama is running
-    const tagsRes = await fetch(`${base}/api/tags`, { timeout: 3000 });
+    const tagsRes = await fetchWithTimeout(`${base}/api/tags`, {}, 4000);
     if (!tagsRes.ok) return emptyResult('Ollama not reachable at ' + base);
 
     const tagsBody = await tagsRes.json();
     const models = (tagsBody.models || []).map(m => m.name);
 
-    // Get running processes
     let runningModel = null;
     let vramUsed = 0;
     let vramTotal = 0;
     try {
-      const psRes = await fetch(`${base}/api/ps`, { timeout: 2000 });
+      const psRes = await fetchWithTimeout(`${base}/api/ps`, {}, 4000);
       if (psRes.ok) {
         const psBody = await psRes.json();
         const procs = psBody.models || [];
         if (procs.length > 0) {
           runningModel = procs[0].name;
-          vramUsed  = procs[0].size_vram || 0;
-          vramTotal = procs[0].size      || 0;
+          vramUsed  = procs.reduce((s, m) => s + (m.size_vram || 0), 0);
+          vramTotal = procs[0].size || procs[0].details?.parameter_size || 8_000_000_000;
         }
       }
     } catch (_) {}
 
-    const pct = vramTotal > 0 ? Math.round((vramUsed / vramTotal) * 100) : 0;
+    const pct = vramTotal > 0 ? Math.min(100, Math.round((vramUsed / vramTotal) * 100)) : 0;
 
     return {
       provider: 'ollama',
@@ -78,9 +76,9 @@ function getCredentialFields() {
 }
 
 async function validateCredentials(creds) {
-  const url = creds.baseUrl || DEFAULT_BASE_URL;
+  const url = (creds && creds.baseUrl) || getBaseUrl();
   try {
-    const res = await fetch(`${url}/api/tags`, { timeout: 3000 });
+    const res = await fetchWithTimeout(`${url.replace(/\/$/, '')}/api/tags`, {}, 4000);
     return res.ok;
   } catch (_) {
     return false;

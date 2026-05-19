@@ -21,16 +21,21 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/bionorthtech/test"
+    "url": "https://github.com/bionorthtech/AiMetr"
   },
   "scripts": {
     "start": "electron .",
     "dev": "NODE_ENV=development electron .",
-    "build": "electron-builder"
+    "build": "electron-builder",
+    "test": "node --test test/*.test.js",
+    "postinstall": "node scripts/generate-tray-icon.js 2>/dev/null || true"
   },
   "dependencies": {
     "electron-store": "^8.1.0",
     "node-fetch": "^2.7.0"
+  },
+  "optionalDependencies": {
+    "@abandonware/noble": "^1.9.2-26"
   },
   "devDependencies": {
     "electron": "^28.0.0",
@@ -39,6 +44,7 @@
   "build": {
     "appId": "com.aimetr.app",
     "productName": "AIMetr",
+    "license": "LICENSE",
     "mac": {
       "category": "public.app-category.developer-tools",
       "target": "dmg"

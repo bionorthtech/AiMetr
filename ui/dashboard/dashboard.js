@@ -28,19 +28,26 @@ async function init() {
   });
 
   // Load initial data
+  let appConfig = {};
   try {
-    [usageState, tasks] = await Promise.all([
+    [usageState, tasks, appConfig] = await Promise.all([
       window.api.invoke('get-all-usage'),
       window.api.invoke('get-tasks'),
+      window.api.invoke('get-config'),
     ]);
   } catch (e) {
     usageState = {};
     tasks = [];
+    appConfig = {};
   }
 
   await loadHistories();
   updateSidebarDots();
   renderTab(activeTab);
+
+  if (!appConfig.ui?.hasCompletedSetup) {
+    Settings.open();
+  }
 
   // IPC live updates
   window.api.on('usage-update', data => {
@@ -51,7 +58,7 @@ async function init() {
 
   window.api.on('task-update', data => {
     tasks = data || [];
-    if (document.visibilityState !== 'hidden' && activeTab !== 'all') renderTab(activeTab);
+    if (document.visibilityState !== 'hidden') renderTab(activeTab);
   });
 
   // Refresh tasks every 15s independently
@@ -63,6 +70,8 @@ async function init() {
 
   // Reload histories every 5min
   setInterval(loadHistories, 5 * 60 * 1000);
+
+  window.api.on('open-settings', () => Settings.open());
 }
 
 async function loadHistories() {

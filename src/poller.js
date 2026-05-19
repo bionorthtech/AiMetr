@@ -41,6 +41,7 @@ class Poller extends EventEmitter {
 
   start(intervalMs = 30000) {
     this._poll();
+    if (this._timer) clearInterval(this._timer);
     this._timer = setInterval(() => this._poll(), intervalMs);
   }
 
@@ -91,7 +92,7 @@ class Poller extends EventEmitter {
           this._state[id] = usage;
           snapshot.providers[id] = {
             pct: usage.session?.pct || 0,
-            cost: usage.cost?.session || 0,
+            cost: usage.cost?.period ?? usage.cost?.session ?? 0,
           };
         }
       }

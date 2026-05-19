@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Syntax check
+        run: |
+          node --check main.js
+          node --check preload.js
+          node --check src/fetch.js
+          node --check src/cost.js
+          node --check src/secrets.js
+          node --check src/poller.js
+          node --check src/store.js
+          node --check src/tracker.js
+          node --check src/ble.js
+
+      - name: Run tests
+        run: npm test
+
+      - name: Verify bundled assets
+        run: |
+          test -f ui/dashboard/vendor/chart.umd.js
+          test -f assets/icons/tray.png
+          test -f LICENSE
+
+  python-daemon:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Syntax check daemon
+        run: python3 -m py_compile daemon/multi_provider_daemon.py

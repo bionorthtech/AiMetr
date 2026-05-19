@@ -5,13 +5,35 @@ const path = require('path');
 const { store, getProviderConfig, setProviderConfig, getHistory } = require('./src/store');
 const poller = require('./src/poller');
 const tracker = require('./src/tracker');
-const ble    = require('./src/ble');
+const ble     = require('./src/ble');
+const secrets = require('./src/secrets');
 
 const isDev = process.env.NODE_ENV === 'development';
+
+const PROVIDER_IDS = ['claude', 'openai', 'deepseek', 'ollama', 'lmstudio'];
 
 let dashboardWin = null;
 let petWin       = null;
 let tray         = null;
+
+function syncProviderEnabled() {
+  PROVIDER_IDS.forEach(id => {
+    const enabled = store.get(`providers.${id}.enabled`, true);
+    poller.setEnabled(id, enabled !== false);
+  });
+}
+
+function getPollIntervalMs() {
+  const sec = store.get('ui.pollInterval', 30) || 30;
+  const clamped = Math.max(10, Math.min(300, sec));
+  return isDev ? Math.min(clamped * 1000, 10000) : clamped * 1000;
+}
+
+function restartPoller() {
+  poller.stop();
+  syncProviderEnabled();
+  poller.start(getPollIntervalMs());
+}
 
 // ─── Window Creation ────────────────────────────────────────────────────────
 
@@ -38,15 +60,21 @@ function createDashboard() {
 
   dashboardWin.loadFile(path.join(__dirname, 'ui', 'dashboard', 'index.html'));
 
+  dashboardWin.webContents.once('did-finish-load', () => {
+    if (!store.get('ui.hasCompletedSetup', false)) {
+      dashboardWin.webContents.send('open-settings');
+    }
+  });
+
   dashboardWin.once('ready-to-show', () => {
     dashboardWin.show();
     if (isDev) dashboardWin.webContents.openDevTools();
   });
 
   dashboardWin.on('close', e => {
-    // On macOS keep the process running when window is closed
     if (process.platform === 'darwin' && !app.isQuitting) {
       e.preventDefault();
+      store.set('ui.dashboardBounds', dashboardWin.getBounds());
       dashboardWin.hide();
     } else {
       store.set('ui.dashboardBounds', dashboardWin.getBounds());
@@ -131,12 +159,17 @@ function buildFallbackIcon() {
 }
 
 function updateTrayMenu(state) {
-  const providerItems = Object.entries(state).map(([id, s]) => ({
-    label: s
-      ? `${id}: ${s.connected ? `${s.session?.pct || 0}%` : '⚠ offline'}`
-      : `${id}: loading…`,
-    enabled: false,
-  }));
+  const providerItems = PROVIDER_IDS
+    .filter(id => store.get(`providers.${id}.enabled`, true) !== false)
+    .map(id => {
+      const s = state[id];
+      return {
+        label: s
+          ? `${id}: ${s.connected ? `${s.session?.pct || 0}%` : '⚠ offline'}`
+          : `${id}: loading…`,
+        enabled: false,
+      };
+    });
 
   const menu = Menu.buildFromTemplate([
     { label: 'AIMetr', enabled: false },
@@ -179,12 +212,17 @@ function registerIpcHandlers() {
 
   ipcMain.handle('get-config', () => {
     const cfg = store.store;
-    // Mask API keys for UI display
     const masked = JSON.parse(JSON.stringify(cfg));
+    if (!masked.providers) masked.providers = {};
+
     ['claude', 'openai', 'deepseek'].forEach(id => {
-      const key = masked.providers?.[id]?.apiKey;
-      if (key && key.length > 8) {
-        masked.providers[id].apiKey = key.slice(0, 8) + '••••••••';
+      if (!masked.providers[id]) masked.providers[id] = {};
+      // Never expose raw keys to the renderer
+      delete masked.providers[id].apiKey;
+
+      if (secrets.hasStoredKey(id)) {
+        masked.providers[id].hasStoredKey = true;
+        masked.providers[id].apiKey = '••••••••••••';
       }
     });
     return masked;
@@ -199,6 +237,8 @@ function registerIpcHandlers() {
     }
     if (patch.pet)    store.set('pet', { ...store.get('pet', {}), ...patch.pet });
     if (patch.ui)     store.set('ui',  { ...store.get('ui',  {}), ...patch.ui  });
+    syncProviderEnabled();
+    if (patch.providers || patch.ui) restartPoller();
     return true;
   });
 
@@ -255,6 +295,7 @@ function broadcast(channel, data) {
 
 app.whenReady().then(() => {
   registerIpcHandlers();
+  secrets.migratePlaintextKeys();
   createDashboard();
   createPetWindow();
   createTray();
@@ -271,17 +312,16 @@ app.whenReady().then(() => {
     broadcast('usage-update', state);
     updateTrayMenu(state);
 
-    // Forward to BLE device if connected
-    if (ble.isAvailable()) ble.sendUsageUpdate(state.claude);
+    // Forward full multi-provider state to BLE device if connected
+    if (ble.isAvailable()) ble.sendUsageUpdate(state, tracker.getTasks());
   });
 
   poller.on('pet-state', petState => {
     broadcast('pet-state', petState);
   });
 
-  // Start polling (faster in dev)
-  const interval = isDev ? 10000 : 30000;
-  poller.start(interval);
+  syncProviderEnabled();
+  poller.start(getPollIntervalMs());
 
   // Start BLE if available
   if (ble.isAvailable()) {

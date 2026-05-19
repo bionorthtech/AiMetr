@@ -1,29 +1,28 @@
 'use strict';
 
-const fetch = require('node-fetch');
+const { fetchWithTimeout } = require('../fetch');
 const { getProviderConfig } = require('../store');
 
 const DEFAULT_BASE_URL = 'http://localhost:1234';
 
 function getBaseUrl() {
   const cfg = getProviderConfig('lmstudio');
-  return cfg.baseUrl || DEFAULT_BASE_URL;
+  return (cfg.baseUrl || DEFAULT_BASE_URL).replace(/\/$/, '');
 }
 
 async function fetchUsage() {
   const base = getBaseUrl();
 
   try {
-    const modelsRes = await fetch(`${base}/v1/models`, { timeout: 3000 });
+    const modelsRes = await fetchWithTimeout(`${base}/v1/models`, {}, 4000);
     if (!modelsRes.ok) return emptyResult('LM Studio not reachable at ' + base);
 
     const modelsBody = await modelsRes.json();
     const models = (modelsBody.data || []).map(m => m.id);
 
-    // Try to get system info
     let memUsed = 0, memTotal = 0;
     try {
-      const sysRes = await fetch(`${base}/api/v0/system`, { timeout: 2000 });
+      const sysRes = await fetchWithTimeout(`${base}/api/v0/system`, {}, 4000);
       if (sysRes.ok) {
         const sys = await sysRes.json();
         memUsed  = sys.ram?.used  || 0;
@@ -31,10 +30,9 @@ async function fetchUsage() {
       }
     } catch (_) {}
 
-    // Try to get active models info via LM Studio v0 API
     let activeModel = models[0] || '';
     try {
-      const activeRes = await fetch(`${base}/api/v0/models`, { timeout: 2000 });
+      const activeRes = await fetchWithTimeout(`${base}/api/v0/models`, {}, 4000);
       if (activeRes.ok) {
         const activeBody = await activeRes.json();
         const loaded = (activeBody.data || []).filter(m => m.state === 'loaded');
@@ -42,7 +40,7 @@ async function fetchUsage() {
       }
     } catch (_) {}
 
-    const pct = memTotal > 0 ? Math.round((memUsed / memTotal) * 100) : 0;
+    const pct = memTotal > 0 ? Math.min(100, Math.round((memUsed / memTotal) * 100)) : 0;
 
     return {
       provider: 'lmstudio',
@@ -82,9 +80,9 @@ function getCredentialFields() {
 }
 
 async function validateCredentials(creds) {
-  const url = creds.baseUrl || DEFAULT_BASE_URL;
+  const url = (creds && creds.baseUrl) || getBaseUrl();
   try {
-    const res = await fetch(`${url}/v1/models`, { timeout: 3000 });
+    const res = await fetchWithTimeout(`${url.replace(/\/$/, '')}/v1/models`, {}, 4000);
     return res.ok;
   } catch (_) {
     return false;

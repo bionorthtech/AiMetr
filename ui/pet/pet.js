@@ -164,44 +164,29 @@ window.api.on('usage-update', usageData => {
   if (!usageData) return;
   lastUsageState = usageData;
 
-  // Find most active provider by pct
+  // Usage bar only — mascot state comes from pet-state IPC (poller is source of truth)
   let maxPct = 0;
-  let activeProv = 'claude';
   Object.entries(usageData).forEach(([id, s]) => {
     if (s && s.connected) {
       const pct = s.session?.pct || 0;
-      if (pct > maxPct) { maxPct = pct; activeProv = id; }
+      if (pct > maxPct) maxPct = pct;
     }
   });
-
   updateUsageBar(maxPct);
-
-  // Determine state
-  const newState =
-    maxPct >= 75 ? 'excited' :
-    maxPct >= 10 ? 'thinking' :
-    maxPct > 0   ? 'idle'    : 'sleeping';
-
-  setState(newState, activeProv);
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 startAnimation('idle');
 
-// Seed the pet from the current usage state immediately on load
+// Seed usage bar immediately on load; pet-state arrives from poller shortly after
 window.api.invoke('get-all-usage').then(data => {
   if (!data) return;
-  let maxPct = 0, activeProv = 'claude';
+  let maxPct = 0;
   Object.entries(data).forEach(([id, s]) => {
     if (s && s.connected) {
       const pct = s.session?.pct || 0;
-      if (pct > maxPct) { maxPct = pct; activeProv = id; }
+      if (pct > maxPct) maxPct = pct;
     }
   });
   updateUsageBar(maxPct);
-  const newState =
-    maxPct >= 75 ? 'excited' :
-    maxPct >= 10 ? 'thinking' :
-    maxPct >  0  ? 'idle'     : 'sleeping';
-  setState(newState, activeProv);
 });

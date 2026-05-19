@@ -66,10 +66,10 @@ async function _render() {
 
       ${Object.entries(fields).map(([key, def]) => `
       <div class="form-row">
-        <div class="form-label">${def.label}</div>
+        <div class="form-label">${def.label}${def.type === 'password' && cfg.hasStoredKey ? ' <span style="font-size:10px;color:var(--text-dim)">(saved securely)</span>' : ''}</div>
         <input class="form-input" type="${def.type}"
           id="input-${id}-${key}"
-          placeholder="${def.placeholder}"
+          placeholder="${def.type === 'password' && cfg.hasStoredKey ? 'Leave blank to keep current key' : def.placeholder}"
           value="${def.type === 'password' ? '' : (cfg[key] || '')}">
       </div>
       `).join('')}
@@ -89,6 +89,16 @@ async function _render() {
       <span class="toggle-label">Enable pet overlay</span>
       <input type="checkbox" id="pet-enabled"
         ${(currentConfig.pet?.enabled !== false) ? 'checked' : ''}>
+    </div>
+  </div>
+
+  <!-- Polling -->
+  <div class="settings-section">
+    <div class="settings-section-title">⏱ Polling</div>
+    <div class="form-row">
+      <div class="form-label">Refresh interval (seconds)</div>
+      <input class="form-input" type="number" id="poll-interval" min="10" max="300"
+        value="${currentConfig.ui?.pollInterval || 30}">
     </div>
   </div>
 
@@ -126,7 +136,7 @@ async function _render() {
 }
 
 async function _save() {
-  const patch = { providers: {}, pet: {} };
+  const patch = { providers: {}, pet: {}, ui: {} };
 
   const providers = Object.keys(PROVIDER_FIELDS);
   for (const id of providers) {
@@ -145,6 +155,12 @@ async function _save() {
 
   const petEnabled = document.getElementById('pet-enabled')?.checked;
   patch.pet.enabled = petEnabled !== false;
+
+  const pollInterval = parseInt(document.getElementById('poll-interval')?.value, 10);
+  if (pollInterval >= 10 && pollInterval <= 300) {
+    patch.ui.pollInterval = pollInterval;
+  }
+  patch.ui.hasCompletedSetup = true;
 
   try {
     await window.api.invoke('set-config', patch);

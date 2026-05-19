@@ -1,11 +1,13 @@
 'use strict';
 
-const fetch = require('node-fetch');
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { getProviderConfig } = require('../store');
+const { fetchWithTimeout } = require('../fetch');
+const { getProviderApiKey } = require('../store');
+const tracker = require('../tracker');
+const { estimateTokenCost, sumUsageCosts, roundCost } = require('../cost');
 
 const MODELS = [
   'claude-opus-4-7',
@@ -34,21 +36,19 @@ const MODEL_COSTS = {
 };
 
 function getApiKey() {
-  // 1. Check stored config
-  const cfg = getProviderConfig('claude');
-  if (cfg.apiKey && cfg.apiKey.length > 10) return cfg.apiKey;
+  const stored = getProviderApiKey('claude');
+  if (stored && stored.length > 10) return stored;
 
-  // 2. Check ~/.claude/.credentials.json
   const credPath = path.join(os.homedir(), '.claude', '.credentials.json');
   if (fs.existsSync(credPath)) {
     try {
       const raw = JSON.parse(fs.readFileSync(credPath, 'utf8'));
-      const key = raw.claudeAiOauth?.accessToken || raw.apiKey || raw.api_key;
+      const key = raw.claudeAiOauth?.accessToken || raw.apiKey || raw.api_key
+        || raw.claudeAiOauthToken || raw.oauth_token;
       if (key) return key;
     } catch (_) {}
   }
 
-  // 3. macOS Keychain
   if (process.platform === 'darwin') {
     try {
       const key = execSync('security find-generic-password -s "claude.ai" -w 2>/dev/null', {
@@ -57,16 +57,19 @@ function getApiKey() {
       }).trim();
       if (key) return key;
     } catch (_) {}
+    try {
+      const key = execSync('security find-generic-password -s "Claude API Key" -w 2>/dev/null', {
+        timeout: 3000,
+        encoding: 'utf8',
+      }).trim();
+      if (key) return key;
+    } catch (_) {}
   }
 
-  // 4. Environment variable
   if (process.env.ANTHROPIC_API_KEY) return process.env.ANTHROPIC_API_KEY;
 
   return null;
 }
-
-let _sessionTokensUsed = 0;
-let _sessionCost = 0;
 
 async function fetchUsage() {
   const apiKey = getApiKey();
@@ -75,22 +78,48 @@ async function fetchUsage() {
   }
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/models', {
-      method: 'GET',
-      timeout: 8000,
+    // Minimal messages request — same approach as the Python daemon (rate-limit headers)
+    const res = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
       headers: {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
       },
-    });
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1,
+        messages: [{ role: 'user', content: 'hi' }],
+      }),
+    }, 15000);
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      return emptyResult(`Claude API error: ${body.error?.message || res.status}`);
+    }
 
     const remaining = parseInt(res.headers.get('anthropic-ratelimit-tokens-remaining') || '0', 10);
     const limit     = parseInt(res.headers.get('anthropic-ratelimit-tokens-limit')     || '0', 10);
     const resetStr  = res.headers.get('anthropic-ratelimit-tokens-reset');
     const resetAt   = resetStr ? new Date(resetStr).getTime() : Date.now() + 60000;
 
-    const used = limit > 0 ? Math.max(0, limit - remaining) : _sessionTokensUsed;
-    const pct  = limit > 0 ? Math.round((used / limit) * 100) : 0;
+    const used = limit > 0 ? Math.max(0, limit - remaining) : 0;
+    const pct  = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0;
+
+    let activeModel = MODELS[0];
+    try {
+      const body = await res.json();
+      if (body.model) activeModel = body.model;
+    } catch (_) {}
+
+    const usage = tracker.getClaudeUsageSummary();
+    const sessionCost = roundCost(
+      estimateTokenCost(
+        usage.session.tokensIn, usage.session.tokensOut,
+        usage.session.model || activeModel, MODEL_COSTS
+      )
+    );
+    const periodCost = roundCost(sumUsageCosts(usage.period.entries, MODEL_COSTS));
 
     return {
       provider: 'claude',
@@ -98,9 +127,9 @@ async function fetchUsage() {
       error: null,
       session: { used, limit, resetAt, pct },
       period:  { used, limit, resetAt, pct },
-      cost:    { session: _sessionCost, period: _sessionCost },
+      cost:    { session: sessionCost, period: periodCost },
       models: MODELS,
-      activeModel: MODELS[0],
+      activeModel,
       lastFetched: Date.now(),
     };
   } catch (err) {
@@ -129,12 +158,12 @@ function getCredentialFields() {
 }
 
 async function validateCredentials(creds) {
-  const key = creds.apiKey || '';
+  const key = (creds && creds.apiKey) || getApiKey();
   if (!key) return false;
   try {
-    const res = await fetch('https://api.anthropic.com/v1/models', {
+    const res = await fetchWithTimeout('https://api.anthropic.com/v1/models', {
       headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-    });
+    }, 8000);
     return res.ok;
   } catch (_) {
     return false;

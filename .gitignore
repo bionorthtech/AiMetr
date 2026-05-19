@@ -19,10 +19,32 @@ firmware/.idf_cmake_build_failed
 __pycache__/
 *.pyc
 .venv/
-daemon/.env
 
-# User config
+# ── Secrets & credentials (never commit) ─────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# Daemon / hardware config with API keys (keep *.example.json templates)
+daemon/config.json
+daemon/.env
 *.clawdmeter.json
+
+# Local overrides and exported app config
+config.json
+config.local.json
+*.local.json
+secrets.json
+**/secrets.json
+**/credentials.json
+**/.credentials.json
+
+# Key / cert material
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
 
 # Claude Code agent worktrees
 .claude/

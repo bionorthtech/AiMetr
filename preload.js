@@ -16,6 +16,7 @@ const ALLOWED_CHANNELS = [
   'task-update',
   'pet-state',
   'show-pet-menu',
+  'open-settings',
 ];
 
 contextBridge.exposeInMainWorld('api', {
