@@ -157,7 +157,7 @@ Safe to commit: `daemon/config.example.json` (placeholders only).
 AiMetr/
 ├── main.js                   # Electron main process
 ├── preload.js                # IPC bridge (context isolation)
-├── LICENSE                   # MIT license
+├── LICENSE                   # Apache 2.0 license
 ├── src/
 │   ├── providers/            # Claude, OpenAI, DeepSeek, Ollama, LM Studio
 │   ├── poller.js             # Poll aggregator + backoff
@@ -249,6 +249,6 @@ CI runs syntax checks, tests, and asset verification via GitHub Actions (`.githu
 
 ## License
 
-MIT License — see [LICENSE](LICENSE).
+Apache 2.0 License — see [LICENSE](LICENSE).
 
 Copyright (c) 2026 bionorthtech
